@@ -1,0 +1,33 @@
+Acme Apparel - Shipping Policy
+
+Effective date: 2025-01-01
+
+1. Shipping Methods & Delivery Times
+- Standard Shipping (Domestic): 5–8 business days.
+- Express Shipping (Domestic): 1–3 business days.
+- International Shipping: Varies by destination, typically 8–20 business days.
+
+2. Order Processing
+- Orders are processed within 1–2 business days of receipt, excluding weekends and public holidays. Processing time may extend during peak sales periods or promotions.
+- Orders placed after the daily cutoff (varies by region) will begin processing on the next business day.
+
+3. Shipping Costs & Free Shipping Thresholds
+- Shipping costs are calculated at checkout and may vary by carrier, destination, and package weight/dimensions.
+- Free standard shipping is offered for domestic orders over $50; express shipping discounts or promotions may apply during promotional periods.
+
+4. Tracking & Notifications
+- Customers receive an email with tracking information once the order ships. Tracking availability and granularity vary by carrier.
+- Acme is not liable for carrier transit delays once a shipment is accepted by the carrier, but we will assist in filing claims when shipments are lost or damaged in transit.
+
+5. International Duties & Taxes
+- International shipments may be subject to import duties, taxes, and customs clearance fees. These charges are the responsibility of the recipient unless Acme explicitly indicates otherwise at checkout (e.g., DDP shipments).
+- Acme provides customs documentation as required for international shipments.
+
+6. Returns Shipping
+- Return labels are provided at no cost for eligible domestic returns over the free-shipping threshold. For other returns (including most international returns), return shipping costs apply and may be deducted from the refund unless the return is due to an Acme error.
+
+7. Lost or Damaged Shipments
+- If an order is lost or arrives damaged, customers must notify support within 7 days of reported delivery (or as soon as reasonably possible) to qualify for investigation and remediation.
+
+8. Address Changes & Delivery Instructions
+- Requests to change shipping address after order placement may not be possible if the order has already shipped. Customers should contact support immediately to attempt address updates.

@@ -1,0 +1,11 @@
+Acme Apparel - Customer Support SLA & Response Times
+
+1. Support Channels
+- Email: support@acme-apparel.example
+- In-site assistant: available during business hours
+- Phone support: available in select markets (hours listed on Contact page)
+
+2. Response Targets
+- Priority (damaged/incorrect product): initial response within 24 hours, resolution targets vary.
+- Standard inquiries: initial response within 48–72 hours.
+- Order status & tracking: automated notifications are sent; support will intervene for exceptions.

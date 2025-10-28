@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: workshop-postgres
+    restart: unless-stopped
+    env_file: ./db/.env
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-workshop} -d ${POSTGRES_DB:-store}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: workshop-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file: ./backend/.env
+    ports:
+      - "${PORT:-3001}:3001"
+
+  mcp:
+    build: ./mcp
+    container_name: workshop-mcp
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    env_file: ./mcp/.env
+    ports:
+      - "4000:4000"
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    command: ["http", "mcp:4000"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"
+    depends_on:
+      - mcp
+
+volumes:
+  pgdata:
