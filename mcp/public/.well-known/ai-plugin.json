@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "retailco_mcp",
+  "name_for_human": "RetailCo MCP",
+  "description_for_model": "Provides access to RetailCo's product catalog, stock inventory, categories, and product attributes. Use this to help customers find products, check availability, and answer questions about the product catalog.",
+  "description_for_human": "RetailCo's Product Catalog & Inventory API for AI agents.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://80c2565ec799.ngrok-free.app/openapi.json"
+  },
+  "logo_url": "https://dummyimage.com/100x100/ff6600/ffffff.png&text=RC",
+  "contact_email": "support@retailco.com",
+  "legal_info_url": "https://retailco.com/policies"
+}

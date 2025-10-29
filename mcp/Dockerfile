@@ -12,6 +12,8 @@ COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY docs /app/docs
+COPY openapi.json /app/openapi.json
+COPY public /app/public
 ENV PORT=4000
 EXPOSE 4000
 CMD ["node","dist/index.js"]

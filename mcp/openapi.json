@@ -1,0 +1,338 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "RetailCo MCP API",
+    "version": "1.0.0",
+    "description": "RetailCo Model Context Protocol API providing access to products, stock, categories, and attributes. This API enables AI agents to help customers find products, check availability, and get product information."
+  },
+  "servers": [
+    {
+      "url": "https://80c2565ec799.ngrok-free.app",
+      "description": "Production MCP Server"
+    }
+  ],
+  "paths": {
+    "/categories": {
+      "get": {
+        "operationId": "getCategories",
+        "summary": "Get all product categories",
+        "description": "Returns a list of all available product categories in the catalog (e.g., hoodies, shirts, jeans, jackets, pants).",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": ["hoodies", "shirts", "jeans", "jackets", "pants"]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/categories/sse": {
+      "get": {
+        "operationId": "getCategoriesSSE",
+        "summary": "Get all product categories (SSE)",
+        "description": "Returns a list of all available product categories using Server-Sent Events for streaming.",
+        "responses": {
+          "200": {
+            "description": "Successful SSE stream",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attributes": {
+      "get": {
+        "operationId": "getAttributes",
+        "summary": "Get available product attributes",
+        "description": "Returns available attributes for filtering products. Optionally filter by category to get category-specific attributes.",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter attributes by category (hoodies, shirts, jeans, jackets, pants)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["hoodies", "shirts", "jeans", "jackets", "pants"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "colors": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available colors"
+                    },
+                    "sleeve": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available sleeve types (long, short, sleeveless)"
+                    },
+                    "style": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available styles (plain, printed, embroidered)"
+                    },
+                    "size": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available sizes (XS, S, M, L, XL, XXL)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/query-products": {
+      "get": {
+        "operationId": "queryProducts",
+        "summary": "Search and filter products",
+        "description": "Search for products using various filters like category, color, size, style, sleeve type, and price range. Returns matching products with their details.",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by product category",
+            "schema": {
+              "type": "string",
+              "enum": ["hoodies", "shirts", "jeans", "jackets", "pants"]
+            }
+          },
+          {
+            "name": "color",
+            "in": "query",
+            "description": "Filter by color (e.g., black, blue, red, white)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sleeve",
+            "in": "query",
+            "description": "Filter by sleeve type (only for shirts, hoodies, jackets)",
+            "schema": {
+              "type": "string",
+              "enum": ["long", "short", "sleeveless"]
+            }
+          },
+          {
+            "name": "style",
+            "in": "query",
+            "description": "Filter by style",
+            "schema": {
+              "type": "string",
+              "enum": ["plain", "printed", "embroidered"]
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Filter by size",
+            "schema": {
+              "type": "string",
+              "enum": ["XS", "S", "M", "L", "XL", "XXL"]
+            }
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "description": "Minimum price filter",
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "description": "Maximum price filter",
+            "schema": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search by product name or description",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Maximum number of results to return (default: 20)",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "sku": {
+                        "type": "string",
+                        "description": "Unique product SKU"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Product name"
+                      },
+                      "category": {
+                        "type": "string",
+                        "description": "Product category"
+                      },
+                      "description": {
+                        "type": "string",
+                        "description": "Product description"
+                      },
+                      "color": {
+                        "type": "string",
+                        "description": "Product color"
+                      },
+                      "sleeve": {
+                        "type": "string",
+                        "description": "Sleeve type (if applicable)"
+                      },
+                      "style": {
+                        "type": "string",
+                        "description": "Product style"
+                      },
+                      "size": {
+                        "type": "string",
+                        "description": "Product size"
+                      },
+                      "price": {
+                        "type": "number",
+                        "description": "Product price"
+                      },
+                      "stock": {
+                        "type": "integer",
+                        "description": "Available stock quantity"
+                      },
+                      "image_url": {
+                        "type": "string",
+                        "description": "Product image URL"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/query-stock": {
+      "get": {
+        "operationId": "queryStock",
+        "summary": "Check product stock availability",
+        "description": "Check stock availability for specific products by SKU or by searching product name. Returns stock information and product details.",
+        "parameters": [
+          {
+            "name": "sku",
+            "in": "query",
+            "description": "Product SKU to check stock for",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Search products by name to check stock",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "sku": {
+                        "type": "string",
+                        "description": "Product SKU"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Product name"
+                      },
+                      "stock": {
+                        "type": "integer",
+                        "description": "Available stock quantity"
+                      },
+                      "price": {
+                        "type": "number",
+                        "description": "Product price"
+                      },
+                      "category": {
+                        "type": "string",
+                        "description": "Product category"
+                      },
+                      "color": {
+                        "type": "string",
+                        "description": "Product color"
+                      },
+                      "size": {
+                        "type": "string",
+                        "description": "Product size"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - SKU or name parameter required"
+          }
+        }
+      }
+    }
+  }
+}
