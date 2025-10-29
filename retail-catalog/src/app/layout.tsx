@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { Suspense } from "react"
 import "./globals.css"
 import { Header } from "@/components/Header"
 import { ElevenLabsWidget } from "../../components/elevenlabs-widget"
@@ -20,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Header />
+        <Suspense fallback={<div className="h-16 border-b" />}>
+          <Header />
+        </Suspense>
         {children}
         <ElevenLabsWidget />
       </body>

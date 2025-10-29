@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { FiltersPanel } from "@/components/FiltersPanel"
 import { ProductGrid } from "@/components/ProductGrid"
 import { SortDropdown } from "@/components/SortDropdown"
@@ -10,7 +10,7 @@ import { useProducts } from "@/hooks/useProducts"
 import { useCatalogFilters } from "@/hooks/useCatalogFilters"
 import type { Product } from "@/lib/types"
 
-export default function HomePage() {
+function HomePageContent() {
   const { data, isLoading, error, page, totalPages, total } = useProducts()
   const { clearFilters } = useCatalogFilters()
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -46,5 +46,13 @@ export default function HomePage() {
         onOpenChange={() => setSelectedProduct(null)}
       />
     </>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading...</div>}>
+      <HomePageContent />
+    </Suspense>
   )
 }
