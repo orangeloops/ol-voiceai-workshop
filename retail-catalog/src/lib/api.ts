@@ -1,8 +1,19 @@
 import { API_BASE } from "./config"
 import type { Product, Attributes } from "./types"
 
+// Helper to get the correct API URL based on environment
+function getApiUrl(path: string): string {
+  // If we're on the server (Node.js), use the internal Docker URL
+  if (typeof window === "undefined") {
+    const backendUrl = process.env.BACKEND_URL || "http://backend:3001"
+    return `${backendUrl}/api${path}`
+  }
+  // If we're on the client (browser), use the Next.js API proxy
+  return `${API_BASE}${path}`
+}
+
 export async function fetchCategories(): Promise<string[]> {
-  const response = await fetch(`${API_BASE}/categories`, { cache: "no-store" })
+  const response = await fetch(getApiUrl("/categories"), { cache: "no-store" })
   if (!response.ok) {
     throw new Error("Failed to fetch categories")
   }
@@ -14,7 +25,7 @@ export async function fetchAttributes(category?: string): Promise<Attributes> {
   if (category) {
     params.set("category", category)
   }
-  const response = await fetch(`${API_BASE}/attributes?${params.toString()}`, {
+  const response = await fetch(getApiUrl(`/attributes?${params.toString()}`), {
     cache: "no-store",
   })
   if (!response.ok) {
@@ -38,7 +49,7 @@ export async function fetchProducts(
     }
   })
 
-  const response = await fetch(`${API_BASE}/products?${searchParams.toString()}`, {
+  const response = await fetch(getApiUrl(`/products?${searchParams.toString()}`), {
     cache: "no-store",
   })
 

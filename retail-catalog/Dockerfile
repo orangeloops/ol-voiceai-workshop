@@ -15,6 +15,15 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Set build-time environment variables
+ARG NEXT_PUBLIC_API_BASE_URL=/api
+ARG NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC
+ARG NEXT_PUBLIC_ELEVENLABS_AGENT_ID
+
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+ENV NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC=${NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC}
+ENV NEXT_PUBLIC_ELEVENLABS_AGENT_ID=${NEXT_PUBLIC_ELEVENLABS_AGENT_ID}
+
 # Build the application
 RUN npm run build
 
@@ -23,6 +32,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV BACKEND_URL=http://backend:3001
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

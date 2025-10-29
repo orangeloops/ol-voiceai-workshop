@@ -40,13 +40,19 @@ services:
       - "4000:4000"
 
   retail-catalog:
-    build: ./retail-catalog
+    build:
+      context: ./retail-catalog
+      args:
+        NEXT_PUBLIC_API_BASE_URL: /api
+        NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC: ${NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC}
+        NEXT_PUBLIC_ELEVENLABS_AGENT_ID: ${NEXT_PUBLIC_ELEVENLABS_AGENT_ID}
     container_name: workshop-retail-catalog
     restart: unless-stopped
     depends_on:
       backend:
         condition: service_started
-    env_file: ./retail-catalog/.env
+    environment:
+      - BACKEND_URL=http://backend:3001
     ports:
       - "3000:3000"
 
