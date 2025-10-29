@@ -39,6 +39,17 @@ services:
     ports:
       - "4000:4000"
 
+  retail-catalog:
+    build: ./retail-catalog
+    container_name: workshop-retail-catalog
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    env_file: ./retail-catalog/.env
+    ports:
+      - "3000:3000"
+
   ngrok:
     image: ngrok/ngrok:latest
     command: ["http", "mcp:4000"]
