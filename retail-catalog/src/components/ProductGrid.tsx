@@ -48,7 +48,7 @@ export function ProductGrid({ products, isLoading, error, onProductClick, onRetr
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {products.map((product) => (
-        <ProductCard key={product.product_id} product={product} onClick={() => onProductClick(product)} />
+        <ProductCard key={product.id} product={product} onClick={() => onProductClick(product)} />
       ))}
     </div>
   )

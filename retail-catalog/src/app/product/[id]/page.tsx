@@ -8,26 +8,33 @@ import Image from "next/image"
 import Link from "next/link"
 
 interface ProductPageProps {
-  params: Promise<{ sku: string }>
+  params: Promise<{ id: string }>
 }
 
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { sku } = await params
-  console.log('ProductPage SKU:', sku)
+  const { id } = await params
+  console.log('ProductPage - Received ID from params:', id, 'Type:', typeof id)
 
-  // Buscar el producto directamente por SKU
-  const products = await fetchProducts({ sku })
-  console.log('Productos encontrados por SKU:', products.length)
+  // Buscar el producto directamente por ID
+  const idNumber = Number(id)
+  console.log('ProductPage - Searching for ID:', idNumber, 'Type:', typeof idNumber)
+  
+  const products = await fetchProducts({ id: idNumber })
+  console.log('ProductPage - API returned', products.length, 'products')
   
   const product = products[0]
   
   if (!product) {
-    console.log('No se encontró producto con SKU:', sku)
+    console.log('ProductPage - No product found with ID:', idNumber)
     notFound()
   }
 
-  console.log('Producto encontrado:', product.name, 'Stock:', product.stock)
+  console.log('ProductPage - Found product:', {
+    id: product.id,
+    name: product.product_display_name,
+    stock: product.stock
+  })
   const stockStatus = getStockStatus(product.stock)
 
   return (
@@ -41,7 +48,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
           <Image
             src={product.image_url || "/placeholder.svg"}
-            alt={product.name}
+            alt={product.product_display_name}
             fill
             className="object-cover"
             priority
@@ -51,8 +58,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-balance mb-2">{product.name}</h1>
-            <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+            <h1 className="text-3xl font-bold text-balance mb-2">{product.product_display_name}</h1>
+            <p className="text-sm text-muted-foreground">ID: {product.id}</p>
           </div>
 
           <div>
@@ -63,41 +70,57 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-xl font-semibold">Description</h2>
-            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-          </div>
-
-          <div className="space-y-3">
             <h2 className="text-xl font-semibold">Product Details</h2>
             <dl className="grid grid-cols-2 gap-3">
               <div>
                 <dt className="text-sm text-muted-foreground">Category</dt>
-                <dd className="capitalize font-medium">{product.category}</dd>
+                <dd className="font-medium">{product.master_category}</dd>
               </div>
 
               <div>
-                <dt className="text-sm text-muted-foreground">Color</dt>
-                <dd className="capitalize font-medium">{product.color}</dd>
+                <dt className="text-sm text-muted-foreground">Sub Category</dt>
+                <dd className="font-medium">{product.sub_category}</dd>
               </div>
-
-              {product.sleeve && (
-                <div>
-                  <dt className="text-sm text-muted-foreground">Sleeve</dt>
-                  <dd className="capitalize font-medium">{product.sleeve}</dd>
-                </div>
-              )}
-
-              {product.style && (
-                <div>
-                  <dt className="text-sm text-muted-foreground">Style</dt>
-                  <dd className="capitalize font-medium">{product.style}</dd>
-                </div>
-              )}
 
               <div>
-                <dt className="text-sm text-muted-foreground">Size</dt>
-                <dd className="font-medium">{product.size}</dd>
+                <dt className="text-sm text-muted-foreground">Article Type</dt>
+                <dd className="font-medium">{product.article_type}</dd>
               </div>
+
+              {product.gender && (
+                <div>
+                  <dt className="text-sm text-muted-foreground">Gender</dt>
+                  <dd className="font-medium">{product.gender}</dd>
+                </div>
+              )}
+
+              {product.base_colour && (
+                <div>
+                  <dt className="text-sm text-muted-foreground">Color</dt>
+                  <dd className="capitalize font-medium">{product.base_colour}</dd>
+                </div>
+              )}
+
+              {product.season && (
+                <div>
+                  <dt className="text-sm text-muted-foreground">Season</dt>
+                  <dd className="font-medium">{product.season}</dd>
+                </div>
+              )}
+
+              {product.usage && (
+                <div>
+                  <dt className="text-sm text-muted-foreground">Usage</dt>
+                  <dd className="font-medium">{product.usage}</dd>
+                </div>
+              )}
+
+              {product.year && (
+                <div>
+                  <dt className="text-sm text-muted-foreground">Year</dt>
+                  <dd className="font-medium">{product.year}</dd>
+                </div>
+              )}
             </dl>
           </div>
 

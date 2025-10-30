@@ -5,15 +5,16 @@ export const categoriesRouter = Router();
 
 /**
  * GET /api/categories
- * Devuelve todas las categorías definidas en el ENUM (no solo las que tienen productos)
+ * Devuelve todas las categorías principales (master_category) disponibles
  */
 categoriesRouter.get("/", async (_req: Request, res: Response) => {
   try {
-    const sql = `SELECT unnest(enum_range(NULL::category_enum)) AS category;`;
+    const sql = `SELECT DISTINCT master_category FROM products ORDER BY master_category;`;
     const { rows } = await pool.query(sql);
-    res.json(rows.map(r => r.category));
+    res.json(rows.map(r => r.master_category));
   } catch (err) {
     console.error("Error fetching categories:", err);
     res.status(500).json({ error: "Error fetching categories" });
   }
 });
+

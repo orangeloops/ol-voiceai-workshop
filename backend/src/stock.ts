@@ -4,61 +4,70 @@ import { pool } from "./db.js";
 export const stockRouter = Router();
 
 /**
- * GET /api/stock?sku=HOD-BLU-LONG-PLN-M
- * or /api/stock?name=hoodie
+ * GET /api/stock?id=12532
+ * or /api/stock?name=puma
  */
 stockRouter.get("/", async (req: Request, res: Response) => {
-  const { sku, name } = req.query as { sku?: string; name?: string };
+  const { id, name } = req.query as { id?: string; name?: string };
 
-  if (!sku && !name) {
-    return res.status(400).json({ error: "sku or name required" });
+  if (!id && !name) {
+    return res.status(400).json({ error: "id or name required" });
   }
 
   try {
     let result;
 
-    if (sku) {
-      // search by SKU in product_variants
+    if (id) {
+      // search by product ID
       result = await pool.query(
         `
         SELECT 
-          v.sku,
-          p.name AS product_name,
-          p.category,
-          v.color,
-          v.sleeve,
-          v.style,
-          v.size,
-          v.price,
-          v.stock,
-          v.image_url
-        FROM product_variants v
-        JOIN products p ON p.id = v.product_id
-        WHERE v.sku = $1
+          id,
+          gender,
+          master_category,
+          sub_category,
+          article_type,
+          base_colour,
+          season,
+          year,
+          usage,
+          product_display_name,
+          image_url,
+          price,
+          stock
+        FROM products
+        WHERE id = $1
         LIMIT 1;
         `,
-        [sku]
+        [Number(id)]
       );
     } else {
       // search by product name (approximate match)
       result = await pool.query(
         `
         SELECT 
-          v.sku,
-          p.name AS product_name,
-          p.category,
-          v.color,
-          v.sleeve,
-          v.style,
-          v.size,
-          v.price,
-          v.stock,
-          v.image_url
-        FROM product_variants v
-        JOIN products p ON p.id = v.product_id
-        WHERE p.name ILIKE '%' || $1 || '%'
-        ORDER BY similarity(p.name, $1) DESC
-        LIMIT 1;
+          id,
+          gender,
+          master_category,
+          sub_category,
+          article_type,
+          base_colour,
+          season,
+          year,
+          usage,
+          product_display_name,
+          image_url,
+          price,
+          stock
+        FROM products
+        WHERE product_display_name ILIKE '%' || $1 || '%'
+        ORDER BY 
+          CASE 
+            WHEN product_display_name ILIKE $1 || '%' THEN 1
+            WHEN product_display_name ILIKE '%' || $1 || '%' THEN 2
+            ELSE 3
+          END
+        LIMIT 5;
         `,
         [name]
       );
@@ -68,10 +77,20 @@ stockRouter.get("/", async (req: Request, res: Response) => {
       return res.json({ found: false });
     }
 
-    res.json({
-      found: true,
-      ...result.rows[0],
-    });
+    // Si buscamos por ID, devolvemos un solo resultado
+    if (id) {
+      res.json({
+        found: true,
+        ...result.rows[0],
+      });
+    } else {
+      // Si buscamos por nombre, devolvemos múltiples resultados
+      res.json({
+        found: true,
+        count: result.rows.length,
+        products: result.rows,
+      });
+    }
   } catch (err) {
     console.error("Error fetching stock:", err);
     res.status(500).json({ error: "Error fetching stock" });

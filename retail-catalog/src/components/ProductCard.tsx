@@ -29,7 +29,7 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
           src={product.image_url || "/placeholder.svg"}
-          alt={product.name}
+          alt={product.product_display_name}
           fill
           className="object-cover transition-transform group-hover:scale-105"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -43,30 +43,35 @@ export function ProductCard({ product, onClick }: ProductCardProps) {
 
       <div className="p-4 space-y-2">
         <h3 className="font-semibold text-balance line-clamp-2 group-hover:text-primary transition-colors">
-          {product.name}
+          {product.product_display_name}
         </h3>
         <div className="flex items-center justify-between">
           <p className="text-lg font-bold">{formatPrice(product.price)}</p>
-          <p className="text-xs text-muted-foreground">SKU: {product.sku}</p>
+          <p className="text-xs text-muted-foreground">ID: {product.id}</p>
         </div>
         <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
-          <span className="capitalize">{product.color}</span>
-          {product.sleeve && (
+          {product.gender && <span>{product.gender}</span>}
+          {product.base_colour && (
             <>
               <span>•</span>
-              <span className="capitalize">{product.sleeve}</span>
+              <span className="capitalize">{product.base_colour}</span>
             </>
           )}
-          {product.style && (
+          {product.season && (
             <>
               <span>•</span>
-              <span className="capitalize">{product.style}</span>
+              <span>{product.season}</span>
             </>
           )}
-          <span>•</span>
-          <span>{product.size}</span>
+          {product.usage && (
+            <>
+              <span>•</span>
+              <span>{product.usage}</span>
+            </>
+          )}
         </div>
       </div>
     </div>
   )
 }
+

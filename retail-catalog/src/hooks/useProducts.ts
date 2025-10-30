@@ -23,11 +23,14 @@ export function useProducts() {
 
       try {
         const params: Record<string, string | string[] | undefined> = {
-          category: searchParams.get("category") || undefined,
-          color: searchParams.getAll("color") || undefined,
-          sleeve: searchParams.get("sleeve") || undefined,
-          style: searchParams.get("style") || undefined,
-          size: searchParams.getAll("size") || undefined,
+          gender: searchParams.get("gender") || undefined,
+          master_category: searchParams.get("master_category") || undefined,
+          sub_category: searchParams.get("sub_category") || undefined,
+          article_type: searchParams.get("article_type") || undefined,
+          base_colour: searchParams.getAll("base_colour") || undefined,
+          season: searchParams.get("season") || undefined,
+          usage: searchParams.get("usage") || undefined,
+          year: searchParams.get("year") || undefined,
           min_price: searchParams.get("min_price") || undefined,
           max_price: searchParams.get("max_price") || undefined,
           search: searchParams.get("search") || undefined,

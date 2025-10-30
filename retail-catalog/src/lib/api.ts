@@ -20,10 +20,10 @@ export async function fetchCategories(): Promise<string[]> {
   return response.json()
 }
 
-export async function fetchAttributes(category?: string): Promise<Attributes> {
+export async function fetchAttributes(master_category?: string): Promise<Attributes> {
   const params = new URLSearchParams()
-  if (category) {
-    params.set("category", category)
+  if (master_category) {
+    params.set("master_category", master_category)
   }
   const response = await fetch(getApiUrl(`/attributes?${params.toString()}`), {
     cache: "no-store",

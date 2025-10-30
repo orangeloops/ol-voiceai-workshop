@@ -17,10 +17,13 @@ export function FiltersPanel() {
   const { filters, updateFilters, clearFilters } = useCatalogFilters()
   const [categories, setCategories] = useState<string[]>([])
   const [attributes, setAttributes] = useState<Attributes>({
-    colors: [],
-    sleeve: [],
-    style: [],
-    size: [],
+    genders: [],
+    master_categories: [],
+    sub_categories: [],
+    article_types: [],
+    colours: [],
+    seasons: [],
+    usages: [],
   })
   const [isOpen, setIsOpen] = useState(false)
   const [minPrice, setMinPrice] = useState(filters.min_price || "")
@@ -31,8 +34,8 @@ export function FiltersPanel() {
   }, [])
 
   useEffect(() => {
-    fetchAttributes(filters.category).then(setAttributes).catch(console.error)
-  }, [filters.category])
+    fetchAttributes(filters.master_category).then(setAttributes).catch(console.error)
+  }, [filters.master_category])
 
   // Debounce price updates
   useEffect(() => {
@@ -43,11 +46,13 @@ export function FiltersPanel() {
   }, [minPrice, maxPrice])
 
   const hasActiveFilters =
-    filters.category ||
-    (filters.color && filters.color.length > 0) ||
-    filters.sleeve ||
-    filters.style ||
-    (filters.size && filters.size.length > 0) ||
+    filters.gender ||
+    filters.master_category ||
+    filters.sub_category ||
+    filters.article_type ||
+    (filters.base_colour && filters.base_colour.length > 0) ||
+    filters.season ||
+    filters.usage ||
     filters.min_price ||
     filters.max_price
 
@@ -57,8 +62,8 @@ export function FiltersPanel() {
       <div className="space-y-3">
         <Label className="text-sm font-semibold">Category</Label>
         <RadioGroup
-          value={filters.category || "all"}
-          onValueChange={(value) => updateFilters({ category: value === "all" ? undefined : value })}
+          value={filters.master_category || "all"}
+          onValueChange={(value) => updateFilters({ master_category: value === "all" ? undefined : value })}
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="all" id="cat-all" />
@@ -77,23 +82,85 @@ export function FiltersPanel() {
         </RadioGroup>
       </div>
 
+      {/* Gender */}
+      {Array.isArray(attributes.genders) && attributes.genders.length > 0 && (
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className="flex w-full items-center justify-between">
+            <Label className="text-sm font-semibold">Gender</Label>
+            <ChevronDown className="h-4 w-4" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <RadioGroup
+              value={filters.gender || "all"}
+              onValueChange={(value) => updateFilters({ gender: value === "all" ? undefined : value })}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="all" id="gender-all" />
+                <Label htmlFor="gender-all" className="font-normal cursor-pointer">
+                  All
+                </Label>
+              </div>
+              {attributes.genders.map((gender) => (
+                <div key={gender} className="flex items-center space-x-2">
+                  <RadioGroupItem value={gender} id={`gender-${gender}`} />
+                  <Label htmlFor={`gender-${gender}`} className="font-normal cursor-pointer">
+                    {gender}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
+      {/* Sub Category */}
+      {Array.isArray(attributes.sub_categories) && attributes.sub_categories.length > 0 && (
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className="flex w-full items-center justify-between">
+            <Label className="text-sm font-semibold">Sub Category</Label>
+            <ChevronDown className="h-4 w-4" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-3">
+            <RadioGroup
+              value={filters.sub_category || "all"}
+              onValueChange={(value) => updateFilters({ sub_category: value === "all" ? undefined : value })}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="all" id="subcat-all" />
+                <Label htmlFor="subcat-all" className="font-normal cursor-pointer">
+                  All
+                </Label>
+              </div>
+              {attributes.sub_categories.map((subcat) => (
+                <div key={subcat} className="flex items-center space-x-2">
+                  <RadioGroupItem value={subcat} id={`subcat-${subcat}`} />
+                  <Label htmlFor={`subcat-${subcat}`} className="font-normal cursor-pointer">
+                    {subcat}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+
       {/* Colors */}
-      {Array.isArray(attributes.colors) && attributes.colors.length > 0 && (
+      {Array.isArray(attributes.colours) && attributes.colours.length > 0 && (
         <Collapsible defaultOpen>
           <CollapsibleTrigger className="flex w-full items-center justify-between">
             <Label className="text-sm font-semibold">Color</Label>
             <ChevronDown className="h-4 w-4" />
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3 space-y-2">
-            {(Array.isArray(attributes.colors) ? attributes.colors : []).map((color) => (
+          <CollapsibleContent className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+            {attributes.colours.map((color) => (
               <div key={color} className="flex items-center space-x-2">
                 <Checkbox
                   id={`color-${color}`}
-                  checked={filters.color?.includes(color)}
+                  checked={filters.base_colour?.includes(color)}
                   onCheckedChange={(checked) => {
-                    const current = filters.color || []
+                    const current = filters.base_colour || []
                     updateFilters({
-                      color: checked ? [...current, color] : current.filter((c) => c !== color),
+                      base_colour: checked ? [...current, color] : current.filter((c) => c !== color),
                     })
                   }}
                 />
@@ -106,29 +173,29 @@ export function FiltersPanel() {
         </Collapsible>
       )}
 
-      {/* Sleeve */}
-      {Array.isArray(attributes.sleeve) && attributes.sleeve.length > 0 && (
+      {/* Season */}
+      {Array.isArray(attributes.seasons) && attributes.seasons.length > 0 && (
         <Collapsible defaultOpen>
           <CollapsibleTrigger className="flex w-full items-center justify-between">
-            <Label className="text-sm font-semibold">Sleeve</Label>
+            <Label className="text-sm font-semibold">Season</Label>
             <ChevronDown className="h-4 w-4" />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
             <RadioGroup
-              value={filters.sleeve || "all"}
-              onValueChange={(value) => updateFilters({ sleeve: value === "all" ? undefined : value })}
+              value={filters.season || "all"}
+              onValueChange={(value) => updateFilters({ season: value === "all" ? undefined : value })}
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="all" id="sleeve-all" />
-                <Label htmlFor="sleeve-all" className="font-normal cursor-pointer">
+                <RadioGroupItem value="all" id="season-all" />
+                <Label htmlFor="season-all" className="font-normal cursor-pointer">
                   All
                 </Label>
               </div>
-              {(Array.isArray(attributes.sleeve) ? attributes.sleeve : []).map((sleeve) => (
-                <div key={sleeve} className="flex items-center space-x-2">
-                  <RadioGroupItem value={sleeve} id={`sleeve-${sleeve}`} />
-                  <Label htmlFor={`sleeve-${sleeve}`} className="font-normal cursor-pointer capitalize">
-                    {sleeve}
+              {attributes.seasons.map((season) => (
+                <div key={season} className="flex items-center space-x-2">
+                  <RadioGroupItem value={season} id={`season-${season}`} />
+                  <Label htmlFor={`season-${season}`} className="font-normal cursor-pointer">
+                    {season}
                   </Label>
                 </div>
               ))}
@@ -137,62 +204,33 @@ export function FiltersPanel() {
         </Collapsible>
       )}
 
-      {/* Style */}
-      {Array.isArray(attributes.style) && attributes.style.length > 0 && (
+      {/* Usage */}
+      {Array.isArray(attributes.usages) && attributes.usages.length > 0 && (
         <Collapsible defaultOpen>
           <CollapsibleTrigger className="flex w-full items-center justify-between">
-            <Label className="text-sm font-semibold">Style</Label>
+            <Label className="text-sm font-semibold">Usage</Label>
             <ChevronDown className="h-4 w-4" />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-3">
             <RadioGroup
-              value={filters.style || "all"}
-              onValueChange={(value) => updateFilters({ style: value === "all" ? undefined : value })}
+              value={filters.usage || "all"}
+              onValueChange={(value) => updateFilters({ usage: value === "all" ? undefined : value })}
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="all" id="style-all" />
-                <Label htmlFor="style-all" className="font-normal cursor-pointer">
+                <RadioGroupItem value="all" id="usage-all" />
+                <Label htmlFor="usage-all" className="font-normal cursor-pointer">
                   All
                 </Label>
               </div>
-              {(Array.isArray(attributes.style) ? attributes.style : []).map((style) => (
-                <div key={style} className="flex items-center space-x-2">
-                  <RadioGroupItem value={style} id={`style-${style}`} />
-                  <Label htmlFor={`style-${style}`} className="font-normal cursor-pointer capitalize">
-                    {style}
+              {attributes.usages.map((usage) => (
+                <div key={usage} className="flex items-center space-x-2">
+                  <RadioGroupItem value={usage} id={`usage-${usage}`} />
+                  <Label htmlFor={`usage-${usage}`} className="font-normal cursor-pointer">
+                    {usage}
                   </Label>
                 </div>
               ))}
             </RadioGroup>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
-
-      {/* Size */}
-      {Array.isArray(attributes.size) && attributes.size.length > 0 && (
-        <Collapsible defaultOpen>
-          <CollapsibleTrigger className="flex w-full items-center justify-between">
-            <Label className="text-sm font-semibold">Size</Label>
-            <ChevronDown className="h-4 w-4" />
-          </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3 space-y-2">
-            {(Array.isArray(attributes.size) ? attributes.size : []).map((size) => (
-              <div key={size} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`size-${size}`}
-                  checked={filters.size?.includes(size)}
-                  onCheckedChange={(checked) => {
-                    const current = filters.size || []
-                    updateFilters({
-                      size: checked ? [...current, size] : current.filter((s) => s !== size),
-                    })
-                  }}
-                />
-                <Label htmlFor={`size-${size}`} className="font-normal cursor-pointer">
-                  {size}
-                </Label>
-              </div>
-            ))}
           </CollapsibleContent>
         </Collapsible>
       )}
@@ -270,3 +308,4 @@ export function FiltersPanel() {
     </>
   )
 }
+

@@ -5,87 +5,115 @@ export const productsRouter = express.Router();
 
 /**
  * GET /api/products
- * Query params: category, color, sleeve, style, size, min_price, max_price, sku
+ * Query params: id, gender, master_category, sub_category, article_type, base_colour, season, usage, min_price, max_price, year
  */
 productsRouter.get("/", async (req: Request, res: Response) => {
   try {
     const {
-      category,
-      color,
-      sleeve,
-      style,
-      size,
+      id,
+      gender,
+      master_category,
+      sub_category,
+      article_type,
+      base_colour,
+      season,
+      usage,
       min_price,
       max_price,
-      sku,
+      year,
     } = req.query;
+
+    console.log('Products API - Query params:', { id, gender, master_category, sub_category, article_type });
 
     const conditions: string[] = [];
     const values: any[] = [];
 
     // Filters dynamically
-    if (category) {
-      values.push(String(category));
-      conditions.push(`p.category::text ILIKE $${values.length}`);
+    if (id) {
+      values.push(Number(id));
+      conditions.push(`id = $${values.length}`);
     }
-    if (color) {
-      values.push(String(color));
-      conditions.push(`v.color::text ILIKE $${values.length}`);
+    if (gender) {
+      values.push(String(gender));
+      conditions.push(`gender ILIKE $${values.length}`);
     }
-    if (sleeve) {
-      values.push(String(sleeve));
-      conditions.push(`v.sleeve::text ILIKE $${values.length}`);
+    if (master_category) {
+      values.push(String(master_category));
+      conditions.push(`master_category ILIKE $${values.length}`);
     }
-    if (style) {
-      values.push(String(style));
-      conditions.push(`v.style::text ILIKE $${values.length}`);
+    if (sub_category) {
+      values.push(String(sub_category));
+      conditions.push(`sub_category ILIKE $${values.length}`);
     }
-    if (size) {
-      values.push(String(size));
-      conditions.push(`v.size::text ILIKE $${values.length}`);
+    if (article_type) {
+      values.push(String(article_type));
+      conditions.push(`article_type ILIKE $${values.length}`);
+    }
+    if (base_colour) {
+      values.push(String(base_colour));
+      conditions.push(`base_colour ILIKE $${values.length}`);
+    }
+    if (season) {
+      values.push(String(season));
+      conditions.push(`season ILIKE $${values.length}`);
+    }
+    if (usage) {
+      values.push(String(usage));
+      conditions.push(`usage ILIKE $${values.length}`);
+    }
+    if (year) {
+      values.push(Number(year));
+      conditions.push(`year = $${values.length}`);
     }
     if (min_price) {
       values.push(Number(min_price));
-      conditions.push(`v.price >= $${values.length}`);
+      conditions.push(`price >= $${values.length}`);
     }
     if (max_price) {
       values.push(Number(max_price));
-      conditions.push(`v.price <= $${values.length}`);
-    }
-    if (sku) {
-      values.push(String(sku));
-      conditions.push(`v.sku = $${values.length}`);
+      conditions.push(`price <= $${values.length}`);
     }
 
     const whereClause =
       conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
+    // Si estamos buscando por ID, solo devolver ese producto
+    const limit = id ? "LIMIT 1" : "LIMIT 100";
+    const orderBy = id ? "" : "ORDER BY master_category, article_type, product_display_name";
+
     const query = `
       SELECT
-        p.id AS product_id,
-        p.slug,
-        p.name,
-        p.category,
-        p.description,
-        v.sku,
-        v.color,
-        v.sleeve,
-        v.style,
-        v.size,
-        v.price,
-        v.stock,
-        v.image_url
-      FROM products p
-      JOIN product_variants v ON p.id = v.product_id
+        id,
+        gender,
+        master_category,
+        sub_category,
+        article_type,
+        base_colour,
+        season,
+        year,
+        usage,
+        product_display_name,
+        image_url,
+        price,
+        stock
+      FROM products
       ${whereClause}
-      ORDER BY p.category, p.name
-      LIMIT 100;
+      ${orderBy}
+      ${limit};
     `;
 
+    console.log('Products API - Query:', query.replace(/\s+/g, ' '));
+    console.log('Products API - Values:', values);
+
     const result = await pool.query(query, values);
+    console.log('Products API - Results count:', result.rows.length);
+    if (id && result.rows.length > 0) {
+      console.log('Products API - Found product:', result.rows[0].id, result.rows[0].product_display_name);
+    }
     res.json(result.rows);
   } catch (err) {
     console.error("Error fetching products:", err);
     res.status(500).json({ error: "Error fetching products" });
   }
 });
+

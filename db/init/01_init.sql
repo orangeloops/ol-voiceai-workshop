@@ -1,182 +1,99 @@
--- ====== PRE: extensiones y tipos (igual que los tuyos) ======
+-- ====== EXTENSIONS ======
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'category_enum') THEN
-        CREATE TYPE category_enum AS ENUM ('hoodies','shirts','jeans','jackets','pants');
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'sleeve_enum') THEN
-        CREATE TYPE sleeve_enum AS ENUM ('long','short','sleeveless');
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'style_enum') THEN
-        CREATE TYPE style_enum AS ENUM ('plain','printed','embroidered');
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'size_enum') THEN
-        CREATE TYPE size_enum AS ENUM ('XS','S','M','L','XL','XXL');
-    END IF;
-END$$;
+-- ====== DROP OLD TABLES IF EXIST ======
+DROP TABLE IF EXISTS product_variants CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP VIEW IF EXISTS product_attributes CASCADE;
+DROP TYPE IF EXISTS category_enum CASCADE;
+DROP TYPE IF EXISTS sleeve_enum CASCADE;
+DROP TYPE IF EXISTS style_enum CASCADE;
+DROP TYPE IF EXISTS size_enum CASCADE;
 
--- ====== Tablas (igual que las tuyas) ======
-CREATE TABLE IF NOT EXISTS products (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id TEXT NOT NULL DEFAULT 'public',
-    slug TEXT NOT NULL UNIQUE,
-    name TEXT NOT NULL,
-    category category_enum NOT NULL,
-    description TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS product_variants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    sku TEXT NOT NULL UNIQUE,
-    color TEXT NOT NULL,
-    sleeve sleeve_enum,
-    style style_enum,
-    size size_enum NOT NULL,
-    price NUMERIC(10,2) NOT NULL,
-    stock INTEGER NOT NULL DEFAULT 0,
+-- ====== TABLES ======
+CREATE TABLE products (
+    id INTEGER PRIMARY KEY,
+    gender TEXT,
+    master_category TEXT NOT NULL,
+    sub_category TEXT NOT NULL,
+    article_type TEXT NOT NULL,
+    base_colour TEXT,
+    season TEXT,
+    year NUMERIC,
+    usage TEXT,
+    product_display_name TEXT NOT NULL,
     image_url TEXT,
+    price NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+    stock INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- ====== SEED MASIVO: 1000 productos + 1 variante c/u ======
-DO $$
-DECLARE
-    TARGET_COUNT INTEGER := 1000;
-    i INTEGER;
-    cat category_enum;
-    col TEXT;
-    slv sleeve_enum;
-    sty style_enum;
-    sz size_enum;
-    product_id UUID;
-    product_name TEXT;
-    product_slug TEXT;
-    product_desc TEXT;
-    cat_code TEXT;
-    price_val NUMERIC;
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM products LIMIT 1) THEN
-        FOR i IN 1..TARGET_COUNT LOOP
-            -- Elegir categoría aleatoriamente
-            cat := (ARRAY['hoodies','shirts','jeans','jackets','pants']::category_enum[])[1 + floor(random()*5)::int];
-            
-            -- Elegir color según categoría
-            col := CASE cat
-                WHEN 'hoodies' THEN (ARRAY['black','blue','gray','red','green','white','beige'])[1 + floor(random()*7)::int]
-                WHEN 'shirts' THEN (ARRAY['white','black','navy','gray','red','green','yellow','beige'])[1 + floor(random()*8)::int]
-                WHEN 'jeans' THEN (ARRAY['blue','black','darkblue','lightblue','gray'])[1 + floor(random()*5)::int]
-                WHEN 'jackets' THEN (ARRAY['black','navy','olive','brown','beige','gray'])[1 + floor(random()*6)::int]
-                WHEN 'pants' THEN (ARRAY['black','navy','khaki','gray','brown','olive'])[1 + floor(random()*6)::int]
-            END;
-            
-            -- Elegir estilo
-            sty := CASE cat
-                WHEN 'hoodies' THEN (ARRAY['plain','printed','embroidered']::style_enum[])[1 + floor(random()*3)::int]
-                WHEN 'shirts' THEN (ARRAY['plain','printed','embroidered']::style_enum[])[1 + floor(random()*3)::int]
-                WHEN 'jackets' THEN (ARRAY['plain','embroidered']::style_enum[])[1 + floor(random()*2)::int]
-                ELSE 'plain'::style_enum
-            END;
-            
-            -- Elegir sleeve (solo para tops)
-            slv := CASE cat
-                WHEN 'hoodies' THEN (ARRAY['long','short']::sleeve_enum[])[1 + floor(random()*2)::int]
-                WHEN 'shirts' THEN (ARRAY['long','short']::sleeve_enum[])[1 + floor(random()*2)::int]
-                WHEN 'jackets' THEN 'long'::sleeve_enum
-                ELSE NULL
-            END;
-            
-            -- Elegir tamaño
-            sz := (ARRAY['XS','S','M','L','XL','XXL']::size_enum[])[1 + floor(random()*6)::int];
-            
-            -- Generar nombre
-            product_name := initcap(
-                CASE cat
-                    WHEN 'hoodies' THEN sty::text || ' ' || col || ' Hoodie'
-                    WHEN 'shirts' THEN sty::text || ' ' || col || ' T-Shirt'
-                    WHEN 'jeans' THEN col || ' Jeans'
-                    WHEN 'jackets' THEN sty::text || ' ' || col || ' Jacket'
-                    WHEN 'pants' THEN col || ' Pants'
-                END
-            ) || ' #' || i;
-            
-            -- Generar slug único
-            product_slug := regexp_replace(lower(
-                CASE cat
-                    WHEN 'hoodies' THEN sty::text || '-' || col || '-hoodie'
-                    WHEN 'shirts' THEN sty::text || '-' || col || '-shirt'
-                    WHEN 'jeans' THEN col || '-jeans'
-                    WHEN 'jackets' THEN sty::text || '-' || col || '-jacket'
-                    WHEN 'pants' THEN col || '-pants'
-                END
-            ), '[^a-z0-9\-]+', '-', 'g') || '-' || i;
-            
-            -- Descripción
-            product_desc := CASE cat
-                WHEN 'hoodies' THEN 'Soft cotton hoodie, regular fit.'
-                WHEN 'shirts' THEN 'Classic t-shirt, breathable fabric.'
-                WHEN 'jeans' THEN 'Denim jeans with comfortable fit.'
-                WHEN 'jackets' THEN 'Versatile jacket for everyday wear.'
-                WHEN 'pants' THEN 'Comfortable pants suitable for daily use.'
-            END;
-            
-            -- Código de categoría
-            cat_code := CASE cat
-                WHEN 'hoodies' THEN 'HOD'
-                WHEN 'shirts' THEN 'SRT'
-                WHEN 'jeans' THEN 'JNS'
-                WHEN 'jackets' THEN 'JKT'
-                WHEN 'pants' THEN 'PNT'
-            END;
-            
-            -- Precio base
-            price_val := CASE cat
-                WHEN 'hoodies' THEN round((49 + random()*30)::numeric, 2)
-                WHEN 'shirts' THEN round((14 + random()*20)::numeric, 2)
-                WHEN 'jeans' THEN round((39 + random()*40)::numeric, 2)
-                WHEN 'jackets' THEN round((69 + random()*80)::numeric, 2)
-                WHEN 'pants' THEN round((29 + random()*35)::numeric, 2)
-            END;
-            
-            -- Ajustes de precio
-            price_val := round((price_val 
-                + CASE sz WHEN 'XL' THEN 3 WHEN 'XXL' THEN 5 ELSE 0 END
-                + CASE sty WHEN 'embroidered' THEN 7 WHEN 'printed' THEN 3 ELSE 0 END
-            )::numeric, 2);
-            
-            -- Insertar producto
-            INSERT INTO products (slug, name, category, description)
-            VALUES (product_slug, product_name, cat, product_desc)
-            RETURNING id INTO product_id;
-            
-            -- Insertar variante
-            INSERT INTO product_variants (product_id, sku, color, sleeve, style, size, price, stock, image_url)
-            VALUES (
-                product_id,
-                cat_code || '-' || upper(substr(col,1,3)) || '-' ||
-                COALESCE(CASE slv WHEN 'long' THEN 'LNG' WHEN 'short' THEN 'SRT' ELSE NULL END, 'NOS') || '-' ||
-                CASE sty WHEN 'plain' THEN 'PLN' WHEN 'printed' THEN 'PRT' WHEN 'embroidered' THEN 'EMB' END || '-' ||
-                sz::text || '-' || lpad(i::text, 4, '0'),
-                col,
-                slv,
-                sty,
-                sz,
-                price_val,
-                (5 + floor(random()*30))::int,
-                'https://picsum.photos/seed/' || cat::text || '-' || col || '-' || i::text || '/600/600'
-            );
-        END LOOP;
-    END IF;
-END$$;
+-- ====== INDEXES ======
+CREATE INDEX idx_products_gender ON products(gender);
+CREATE INDEX idx_products_master_category ON products(master_category);
+CREATE INDEX idx_products_sub_category ON products(sub_category);
+CREATE INDEX idx_products_article_type ON products(article_type);
+CREATE INDEX idx_products_base_colour ON products(base_colour);
+CREATE INDEX idx_products_season ON products(season);
+CREATE INDEX idx_products_usage ON products(usage);
+CREATE INDEX idx_products_price ON products(price);
 
--- ====== Indexes útiles ======
-CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-CREATE INDEX IF NOT EXISTS idx_variants_sku ON product_variants(sku);
-CREATE INDEX IF NOT EXISTS idx_variants_color ON product_variants(color);
-CREATE INDEX IF NOT EXISTS idx_variants_price ON product_variants(price);
+-- ====== LOAD DATA FROM CSV ======
+COPY products(id, gender, master_category, sub_category, article_type, base_colour, season, year, usage, product_display_name, image_url)
+FROM '/docker-entrypoint-initdb.d/products.csv'
+DELIMITER ','
+CSV HEADER;
+
+-- ====== GENERATE RANDOM PRICES AND STOCK ======
+UPDATE products
+SET 
+    price = CASE 
+        WHEN master_category = 'Apparel' THEN 
+            CASE 
+                WHEN article_type ILIKE '%Jacket%' THEN round((69 + random()*80)::numeric, 2)
+                WHEN article_type ILIKE '%Shirt%' THEN round((14 + random()*20)::numeric, 2)
+                WHEN article_type ILIKE '%Jeans%' OR article_type ILIKE '%Trousers%' THEN round((39 + random()*40)::numeric, 2)
+                WHEN article_type ILIKE '%Tshirt%' OR article_type ILIKE '%Tops%' THEN round((12 + random()*18)::numeric, 2)
+                WHEN article_type ILIKE '%Kurta%' THEN round((25 + random()*35)::numeric, 2)
+                WHEN article_type ILIKE '%Dress%' THEN round((35 + random()*50)::numeric, 2)
+                ELSE round((20 + random()*30)::numeric, 2)
+            END
+        WHEN master_category = 'Footwear' THEN 
+            CASE 
+                WHEN article_type ILIKE '%Sports%' THEN round((59 + random()*70)::numeric, 2)
+                WHEN article_type ILIKE '%Formal%' THEN round((69 + random()*80)::numeric, 2)
+                WHEN article_type ILIKE '%Casual%' THEN round((45 + random()*55)::numeric, 2)
+                WHEN article_type ILIKE '%Flip Flop%' THEN round((8 + random()*12)::numeric, 2)
+                WHEN article_type ILIKE '%Sandal%' THEN round((20 + random()*30)::numeric, 2)
+                ELSE round((40 + random()*50)::numeric, 2)
+            END
+        WHEN master_category = 'Accessories' THEN 
+            CASE 
+                WHEN article_type ILIKE '%Watch%' THEN round((89 + random()*200)::numeric, 2)
+                WHEN article_type ILIKE '%Bag%' OR article_type ILIKE '%Backpack%' THEN round((35 + random()*65)::numeric, 2)
+                WHEN article_type ILIKE '%Wallet%' THEN round((18 + random()*32)::numeric, 2)
+                WHEN article_type ILIKE '%Belt%' THEN round((15 + random()*25)::numeric, 2)
+                WHEN article_type ILIKE '%Sunglass%' THEN round((25 + random()*75)::numeric, 2)
+                WHEN article_type ILIKE '%Jewellery%' OR article_type ILIKE '%Earring%' OR article_type ILIKE '%Ring%' OR article_type ILIKE '%Bracelet%' THEN round((12 + random()*38)::numeric, 2)
+                ELSE round((10 + random()*20)::numeric, 2)
+            END
+        WHEN master_category = 'Personal Care' THEN round((5 + random()*15)::numeric, 2)
+        WHEN master_category = 'Free Items' THEN 0.00
+        ELSE round((15 + random()*35)::numeric, 2)
+    END,
+    stock = (5 + floor(random()*50))::int
+WHERE price = 0.00;
+
+-- ====== CREATE VIEW FOR DISTINCT VALUES ======
+CREATE VIEW product_attributes AS
+SELECT 
+    ARRAY_AGG(DISTINCT gender ORDER BY gender) FILTER (WHERE gender IS NOT NULL) as genders,
+    ARRAY_AGG(DISTINCT master_category ORDER BY master_category) as master_categories,
+    ARRAY_AGG(DISTINCT sub_category ORDER BY sub_category) as sub_categories,
+    ARRAY_AGG(DISTINCT article_type ORDER BY article_type) as article_types,
+    ARRAY_AGG(DISTINCT base_colour ORDER BY base_colour) FILTER (WHERE base_colour IS NOT NULL) as colours,
+    ARRAY_AGG(DISTINCT season ORDER BY season) FILTER (WHERE season IS NOT NULL) as seasons,
+    ARRAY_AGG(DISTINCT usage ORDER BY usage) FILTER (WHERE usage IS NOT NULL) as usages
+FROM products;

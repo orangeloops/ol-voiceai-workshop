@@ -1,37 +1,42 @@
-export type Category = "hoodies" | "shirts" | "jeans" | "jackets" | "pants"
-
 export type Product = {
-  product_id: string
-  slug: string
-  name: string
-  category: Category
-  description: string
-  sku: string
-  color: string
-  sleeve: "long" | "short" | "sleeveless" | null
-  style: "plain" | "printed" | "embroidered" | null
-  size: "XS" | "S" | "M" | "L" | "XL" | "XXL"
+  id: number
+  gender: string | null
+  master_category: string
+  sub_category: string
+  article_type: string
+  base_colour: string | null
+  season: string | null
+  year: number | null
+  usage: string | null
+  product_display_name: string
+  image_url: string
   price: string
   stock: number
-  image_url: string
 }
 
 export type Attributes = {
-  colors: string[]
-  sleeve: string[]
-  style: string[]
-  size: string[]
+  genders: string[]
+  master_categories: string[]
+  sub_categories: string[]
+  article_types: string[]
+  colours: string[]
+  seasons: string[]
+  usages: string[]
 }
 
 export type FilterState = {
-  category?: string
-  color?: string[]
-  sleeve?: string
-  style?: string
-  size?: string[]
+  gender?: string
+  master_category?: string
+  sub_category?: string
+  article_type?: string
+  base_colour?: string[]
+  season?: string
+  usage?: string
+  year?: number
   min_price?: string
   max_price?: string
   search?: string
   page?: number
   sort?: "relevance" | "price-asc" | "price-desc" | "stock"
 }
+

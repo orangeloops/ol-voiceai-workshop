@@ -16,7 +16,7 @@
       "get": {
         "operationId": "getCategories",
         "summary": "Get all product categories",
-        "description": "Returns a list of all available product categories in the catalog (e.g., hoodies, shirts, jeans, jackets, pants).",
+        "description": "Returns a list of all available master product categories in the catalog (e.g., Apparel, Footwear, Accessories, Personal Care).",
         "responses": {
           "200": {
             "description": "Successful response",
@@ -27,7 +27,7 @@
                   "items": {
                     "type": "string"
                   },
-                  "example": ["hoodies", "shirts", "jeans", "jackets", "pants"]
+                  "example": ["Apparel", "Footwear", "Accessories", "Personal Care"]
                 }
               }
             }
@@ -61,16 +61,15 @@
       "get": {
         "operationId": "getAttributes",
         "summary": "Get available product attributes",
-        "description": "Returns available attributes for filtering products. Optionally filter by category to get category-specific attributes.",
+        "description": "Returns available attributes for filtering products. Optionally filter by master_category to get category-specific attributes.",
         "parameters": [
           {
-            "name": "category",
+            "name": "master_category",
             "in": "query",
-            "description": "Filter attributes by category (hoodies, shirts, jeans, jackets, pants)",
+            "description": "Filter attributes by master category (Apparel, Footwear, Accessories, Personal Care)",
             "required": false,
             "schema": {
-              "type": "string",
-              "enum": ["hoodies", "shirts", "jeans", "jackets", "pants"]
+              "type": "string"
             }
           }
         ],
@@ -82,25 +81,40 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "colors": {
+                    "genders": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available genders (Men, Women, Boys, Girls, Unisex)"
+                    },
+                    "master_categories": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available master categories"
+                    },
+                    "sub_categories": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available sub-categories (Topwear, Bottomwear, Shoes, etc.)"
+                    },
+                    "article_types": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Available article types (Tshirts, Jeans, Jackets, etc.)"
+                    },
+                    "colours": {
                       "type": "array",
                       "items": { "type": "string" },
                       "description": "Available colors"
                     },
-                    "sleeve": {
+                    "seasons": {
                       "type": "array",
                       "items": { "type": "string" },
-                      "description": "Available sleeve types (long, short, sleeveless)"
+                      "description": "Available seasons (Summer, Fall, Winter, Spring)"
                     },
-                    "style": {
+                    "usages": {
                       "type": "array",
                       "items": { "type": "string" },
-                      "description": "Available styles (plain, printed, embroidered)"
-                    },
-                    "size": {
-                      "type": "array",
-                      "items": { "type": "string" },
-                      "description": "Available sizes (XS, S, M, L, XL, XXL)"
+                      "description": "Available usage types (Casual, Sports, Formal, Ethnic)"
                     }
                   }
                 }
@@ -114,50 +128,73 @@
       "get": {
         "operationId": "queryProducts",
         "summary": "Search and filter products",
-        "description": "Search for products using various filters like category, color, size, style, sleeve type, and price range. Returns matching products with their details.",
+        "description": "Search for products using various filters like category, gender, color, season, usage, and price range. Returns matching products with their details.",
         "parameters": [
           {
-            "name": "category",
+            "name": "gender",
             "in": "query",
-            "description": "Filter by product category",
+            "description": "Filter by gender",
             "schema": {
               "type": "string",
-              "enum": ["hoodies", "shirts", "jeans", "jackets", "pants"]
+              "enum": ["Men", "Women", "Boys", "Girls", "Unisex"]
             }
           },
           {
-            "name": "color",
+            "name": "master_category",
             "in": "query",
-            "description": "Filter by color (e.g., black, blue, red, white)",
+            "description": "Filter by master category",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "sleeve",
+            "name": "sub_category",
             "in": "query",
-            "description": "Filter by sleeve type (only for shirts, hoodies, jackets)",
+            "description": "Filter by sub-category (e.g., Topwear, Bottomwear, Shoes)",
             "schema": {
-              "type": "string",
-              "enum": ["long", "short", "sleeveless"]
+              "type": "string"
             }
           },
           {
-            "name": "style",
+            "name": "article_type",
             "in": "query",
-            "description": "Filter by style",
+            "description": "Filter by article type (e.g., Tshirts, Jeans, Jackets)",
             "schema": {
-              "type": "string",
-              "enum": ["plain", "printed", "embroidered"]
+              "type": "string"
             }
           },
           {
-            "name": "size",
+            "name": "base_colour",
             "in": "query",
-            "description": "Filter by size",
+            "description": "Filter by color (e.g., Black, Blue, Red, White)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "season",
+            "in": "query",
+            "description": "Filter by season",
             "schema": {
               "type": "string",
-              "enum": ["XS", "S", "M", "L", "XL", "XXL"]
+              "enum": ["Summer", "Fall", "Winter", "Spring"]
+            }
+          },
+          {
+            "name": "usage",
+            "in": "query",
+            "description": "Filter by usage type",
+            "schema": {
+              "type": "string",
+              "enum": ["Casual", "Sports", "Formal", "Ethnic"]
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "description": "Filter by year",
+            "schema": {
+              "type": "number"
             }
           },
           {
@@ -177,25 +214,6 @@
               "type": "number",
               "minimum": 0
             }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "description": "Search by product name or description",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Maximum number of results to return (default: 20)",
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 20
-            }
           }
         ],
         "responses": {
@@ -208,37 +226,45 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "sku": {
-                        "type": "string",
-                        "description": "Unique product SKU"
+                      "id": {
+                        "type": "integer",
+                        "description": "Unique product ID"
                       },
-                      "name": {
+                      "gender": {
                         "type": "string",
-                        "description": "Product name"
+                        "description": "Product gender"
                       },
-                      "category": {
+                      "master_category": {
                         "type": "string",
-                        "description": "Product category"
+                        "description": "Master category"
                       },
-                      "description": {
+                      "sub_category": {
                         "type": "string",
-                        "description": "Product description"
+                        "description": "Sub-category"
                       },
-                      "color": {
+                      "article_type": {
                         "type": "string",
-                        "description": "Product color"
+                        "description": "Article type"
                       },
-                      "sleeve": {
+                      "base_colour": {
                         "type": "string",
-                        "description": "Sleeve type (if applicable)"
+                        "description": "Base color"
                       },
-                      "style": {
+                      "season": {
                         "type": "string",
-                        "description": "Product style"
+                        "description": "Season"
                       },
-                      "size": {
+                      "year": {
+                        "type": "number",
+                        "description": "Year"
+                      },
+                      "usage": {
                         "type": "string",
-                        "description": "Product size"
+                        "description": "Usage type"
+                      },
+                      "product_display_name": {
+                        "type": "string",
+                        "description": "Product display name"
                       },
                       "price": {
                         "type": "number",
@@ -265,14 +291,14 @@
       "get": {
         "operationId": "queryStock",
         "summary": "Check product stock availability",
-        "description": "Check stock availability for specific products by SKU or by searching product name. Returns stock information and product details.",
+        "description": "Check stock availability for specific products by ID or by searching product name. Returns stock information and product details.",
         "parameters": [
           {
-            "name": "sku",
+            "name": "id",
             "in": "query",
-            "description": "Product SKU to check stock for",
+            "description": "Product ID to check stock for",
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           },
           {
@@ -290,46 +316,66 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "sku": {
-                        "type": "string",
-                        "description": "Product SKU"
-                      },
-                      "name": {
-                        "type": "string",
-                        "description": "Product name"
-                      },
-                      "stock": {
-                        "type": "integer",
-                        "description": "Available stock quantity"
-                      },
-                      "price": {
-                        "type": "number",
-                        "description": "Product price"
-                      },
-                      "category": {
-                        "type": "string",
-                        "description": "Product category"
-                      },
-                      "color": {
-                        "type": "string",
-                        "description": "Product color"
-                      },
-                      "size": {
-                        "type": "string",
-                        "description": "Product size"
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "found": {
+                          "type": "boolean",
+                          "description": "Whether product was found"
+                        },
+                        "id": {
+                          "type": "integer",
+                          "description": "Product ID"
+                        },
+                        "product_display_name": {
+                          "type": "string",
+                          "description": "Product name"
+                        },
+                        "stock": {
+                          "type": "integer",
+                          "description": "Available stock quantity"
+                        },
+                        "price": {
+                          "type": "number",
+                          "description": "Product price"
+                        },
+                        "master_category": {
+                          "type": "string",
+                          "description": "Master category"
+                        },
+                        "base_colour": {
+                          "type": "string",
+                          "description": "Base color"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "found": {
+                          "type": "boolean",
+                          "description": "Whether products were found"
+                        },
+                        "count": {
+                          "type": "integer",
+                          "description": "Number of products found"
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
                       }
                     }
-                  }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request - SKU or name parameter required"
+            "description": "Bad request - ID or name parameter required"
           }
         }
       }
