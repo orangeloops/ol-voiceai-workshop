@@ -16,3 +16,13 @@ export async function fetchStock(sku?: string, name?: string) {
   const j = await res.json();
   return j;
 }
+
+export async function fetchBackend(url: string) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`backend error: ${res.status} ${txt}`);
+  }
+  const j = await res.json();
+  return j;
+}

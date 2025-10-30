@@ -1,0 +1,21 @@
+{
+  "agent": {
+    "name": "Retail Catalog Assistant",
+    "prompt": {
+      "prompt": "You are a helpful retail assistant with access to a product catalog. You can help customers find products, check stock availability, and provide information about store policies. Always be friendly and helpful. When searching for products, use the available tools to provide accurate information.",
+      "llm": "gpt-4"
+    },
+    "language": "en",
+    "first_message": "Hello! I'm your retail assistant. I can help you find products, check availability, and answer questions about our policies. How can I help you today?"
+  },
+  "conversation_config": {
+    "mcp_servers": [
+      {
+        "name": "retail-catalog",
+        "url": "http://localhost:4000/mcp",
+        "transport": "http",
+        "description": "Access to retail product catalog and store policies"
+      }
+    ]
+  }
+}
