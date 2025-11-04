@@ -31,7 +31,32 @@ cd ol-boston-workshop
 
 ---
 
-### **2️⃣ Create your environment file**
+### **2️⃣ Verify your setup (optional but recommended)**
+
+Before starting, you can run our verification script to check if all requirements are installed:
+
+#### macOS/Linux:
+```bash
+./check-setup.sh
+```
+
+#### Windows (PowerShell):
+```powershell
+.\check-setup.ps1
+```
+
+The script will check:
+- ✓ Docker Desktop installation and status
+- ✓ Git installation
+- ✓ VS Code installation (optional)
+- ✓ `.env` file configuration
+- ✓ Ngrok authtoken setup
+
+Fix any issues before proceeding to the next step.
+
+---
+
+### **3️⃣ Create your environment file**
 
 Duplicate the example:
 
@@ -59,7 +84,7 @@ NGROK_AUTHTOKEN=your_ngrok_token_here
 
 ---
 
-### **3️⃣ Start all services with Docker**
+### **4️⃣ Start all services with Docker**
 
 ```bash
 docker compose up --build
@@ -80,7 +105,7 @@ That URL is your **public endpoint** for ElevenLabs — copy it.
 
 ---
 
-### **4️⃣ Verify that everything is running**
+### **5️⃣ Verify that everything is running**
 
 **Backend API:**
 
@@ -144,7 +169,7 @@ You should receive JSON responses from all endpoints.
 
 ---
 
-### **5️⃣ Create your ElevenLabs Agent**
+### **6️⃣ Create your ElevenLabs Agent**
 
 1. Go to [ElevenLabs Voice Agents](https://elevenlabs.io/voice-lab/agents)  
 2. Click **“Create Agent”**
@@ -160,7 +185,7 @@ You should receive JSON responses from all endpoints.
 
 ---
 
-### **6️⃣ Add the MCP Tools (Webhooks)**
+### **7️⃣ Add the MCP Tools (Webhooks)**
 
 | Name | URL | Method |
 |------|------|--------|
@@ -171,7 +196,7 @@ You should receive JSON responses from all endpoints.
 
 ---
 
-### **7️⃣ Upload Knowledge Documents (RAG)**
+### **8️⃣ Upload Knowledge Documents (RAG)**
 
 To give your agent company-specific context:
 
@@ -185,7 +210,7 @@ ElevenLabs will automatically perform **Retrieval-Augmented Generation (RAG)** w
 
 ---
 
-### **8️⃣ Test Your Agent**
+### **9️⃣ Test Your Agent**
 
 Try questions like:
 > “Do you have blue hoodies in size M?”  
@@ -194,7 +219,7 @@ Try questions like:
 
 ---
 
-### **9️⃣ Run the Frontend**
+### **🔟 Run the Frontend**
 
 This will open a simple store interface with:
 - Product listings  
