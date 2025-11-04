@@ -11,7 +11,7 @@ Before the session, make sure you have the following installed and configured:
 
 | Tool | Purpose | Notes |
 |------|----------|-------|
-| **Docker Desktop** | Runs all workshop services (DB, backend, MCP, Ngrok) | Must be running before starting |
+| **Docker Desktop** | Runs all workshop services (DB, backend, MCP, Ngrok) | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) - Must be running before starting |
 | **Git** | To clone the project repository | [Download Git](https://git-scm.com/downloads) |
 | **Visual Studio Code** | Recommended IDE | [Download VS Code](https://code.visualstudio.com/) |
 | **Ngrok Account** | Required to expose your local MCP to ElevenLabs | [Sign up here](https://ngrok.com/) |
