@@ -1,13 +1,13 @@
-# Script de verificación de requisitos para el Workshop
-# Para Windows PowerShell
+# Workshop Requirements Verification Script
+# For Windows PowerShell
 
-Write-Host "🔍 Verificando requisitos del Workshop..." -ForegroundColor Cyan
+Write-Host "🔍 Verifying Workshop requirements..." -ForegroundColor Cyan
 Write-Host ""
 
-# Contador de errores
+# Error counter
 $script:Errors = 0
 
-# Función para verificar comandos
+# Function to check commands
 function Check-Command {
     param(
         [string]$Command,
@@ -18,17 +18,17 @@ function Check-Command {
     
     try {
         $null = Get-Command $Command -ErrorAction Stop
-        Write-Host "✓ $Name instalado" -ForegroundColor Green
+        Write-Host "✓ $Name installed" -ForegroundColor Green
         
         if ($VersionCommand) {
             $version = Invoke-Expression $VersionCommand 2>&1
-            Write-Host "  Versión: $version" -ForegroundColor Gray
+            Write-Host "  Version: $version" -ForegroundColor Gray
         }
         return $true
     }
     catch {
-        Write-Host "✗ $Name NO encontrado" -ForegroundColor Red
-        Write-Host "  → Instalar desde: $DownloadUrl" -ForegroundColor Yellow
+        Write-Host "✗ $Name NOT found" -ForegroundColor Red
+        Write-Host "  → Install from: $DownloadUrl" -ForegroundColor Yellow
         $script:Errors++
         return $false
     }
@@ -39,19 +39,19 @@ Write-Host "  1. Docker Desktop" -ForegroundColor White
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Gray
 
 if (Check-Command "docker" "Docker" "docker --version" "https://www.docker.com/products/docker-desktop/") {
-    # Verificar si Docker está corriendo
+    # Check if Docker is running
     try {
         docker info 2>&1 | Out-Null
         if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ Docker Desktop está corriendo" -ForegroundColor Green
+            Write-Host "✓ Docker Desktop is running" -ForegroundColor Green
         }
         else {
-            Write-Host "⚠ Docker está instalado pero NO está corriendo" -ForegroundColor Yellow
-            Write-Host "  → Por favor inicia Docker Desktop antes de ejecutar 'docker compose up'" -ForegroundColor Yellow
+            Write-Host "⚠ Docker is installed but NOT running" -ForegroundColor Yellow
+            Write-Host "  → Please start Docker Desktop before running 'docker compose up'" -ForegroundColor Yellow
         }
     }
     catch {
-        Write-Host "⚠ No se pudo verificar el estado de Docker" -ForegroundColor Yellow
+        Write-Host "⚠ Could not verify Docker status" -ForegroundColor Yellow
     }
 }
 Write-Host ""
@@ -63,10 +63,10 @@ Check-Command "git" "Git" "git --version" "https://git-scm.com/downloads" | Out-
 Write-Host ""
 
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Gray
-Write-Host "  3. Visual Studio Code (opcional)" -ForegroundColor White
+Write-Host "  3. Visual Studio Code (optional)" -ForegroundColor White
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Gray
 if (-not (Check-Command "code" "VS Code" "code --version" "https://code.visualstudio.com/")) {
-    # Verificar si VS Code está instalado en ubicaciones comunes
+    # Check if VS Code is installed in common locations
     $vscodeInstalled = $false
     $vscodePaths = @(
         "$env:LOCALAPPDATA\Programs\Microsoft VS Code\Code.exe",
@@ -76,9 +76,9 @@ if (-not (Check-Command "code" "VS Code" "code --version" "https://code.visualst
     
     foreach ($path in $vscodePaths) {
         if (Test-Path $path) {
-            Write-Host "✓ VS Code instalado (aplicación detectada)" -ForegroundColor Green
-            Write-Host "  ℹ El comando 'code' no está en PATH pero VS Code está instalado" -ForegroundColor Yellow
-            Write-Host "  → Para agregar 'code' al PATH: Abre VS Code → Command Palette (Ctrl+Shift+P) → 'Shell Command: Install code command in PATH'" -ForegroundColor Yellow
+            Write-Host "✓ VS Code installed (application detected)" -ForegroundColor Green
+            Write-Host "  ℹ The 'code' command is not in PATH" -ForegroundColor Yellow
+            Write-Host "  → To add 'code' to PATH: Open VS Code → Command Palette (Ctrl+Shift+P) → 'Shell Command: Install code command in PATH'" -ForegroundColor Yellow
             $vscodeInstalled = $true
             $script:Errors--
             break
@@ -86,60 +86,60 @@ if (-not (Check-Command "code" "VS Code" "code --version" "https://code.visualst
     }
     
     if (-not $vscodeInstalled) {
-        Write-Host "  ℹ VS Code no detectado" -ForegroundColor Yellow
-        Write-Host "  ℹ VS Code es recomendado pero no obligatorio" -ForegroundColor Yellow
+        Write-Host "  ℹ VS Code not detected" -ForegroundColor Yellow
+        Write-Host "  ℹ VS Code is recommended but not required" -ForegroundColor Yellow
         $script:Errors--
     }
 }
 Write-Host ""
 
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Gray
-Write-Host "  4. Archivo .env" -ForegroundColor White
+Write-Host "  4. .env file" -ForegroundColor White
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Gray
 
 if (Test-Path ".env") {
-    Write-Host "✓ Archivo .env existe" -ForegroundColor Green
+    Write-Host "✓ .env file exists" -ForegroundColor Green
     
-    # Verificar variables importantes
+    # Check important variables
     $envContent = Get-Content ".env" -Raw
     
     if ($envContent -match "NGROK_AUTHTOKEN=(.*)") {
         $ngrokToken = $matches[1].Trim()
         
         if ([string]::IsNullOrEmpty($ngrokToken) -or $ngrokToken -eq "your_ngrok_token_here") {
-            Write-Host "⚠ NGROK_AUTHTOKEN no está configurado" -ForegroundColor Yellow
-            Write-Host "  → Obtén tu token en: https://dashboard.ngrok.com/get-started/your-authtoken" -ForegroundColor Yellow
+            Write-Host "⚠ NGROK_AUTHTOKEN is not configured" -ForegroundColor Yellow
+            Write-Host "  → Get your token at: https://dashboard.ngrok.com/get-started/your-authtoken" -ForegroundColor Yellow
             $script:Errors++
         }
         else {
-            Write-Host "✓ NGROK_AUTHTOKEN configurado" -ForegroundColor Green
+            Write-Host "✓ NGROK_AUTHTOKEN configured" -ForegroundColor Green
         }
     }
     else {
-        Write-Host "⚠ NGROK_AUTHTOKEN no encontrado en .env" -ForegroundColor Yellow
+        Write-Host "⚠ NGROK_AUTHTOKEN not found in .env" -ForegroundColor Yellow
         $script:Errors++
     }
 }
 else {
-    Write-Host "✗ Archivo .env NO existe" -ForegroundColor Red
-    Write-Host "  → Ejecuta: copy .env.example .env" -ForegroundColor Yellow
+    Write-Host "✗ .env file does NOT exist" -ForegroundColor Red
+    Write-Host "  → Run: copy .env.example .env" -ForegroundColor Yellow
     $script:Errors++
 }
 Write-Host ""
 
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Gray
-Write-Host "  Resumen" -ForegroundColor White
+Write-Host "  Summary" -ForegroundColor White
 Write-Host "═══════════════════════════════════════════════" -ForegroundColor Gray
 
 if ($script:Errors -eq 0) {
-    Write-Host "✓ ¡Todo listo para el workshop!" -ForegroundColor Green
+    Write-Host "✓ All set for the workshop!" -ForegroundColor Green
     Write-Host ""
-    Write-Host "Siguiente paso:" -ForegroundColor White
+    Write-Host "Next step:" -ForegroundColor White
     Write-Host "  docker compose up --build" -ForegroundColor Cyan
 }
 else {
-    Write-Host "✗ Encontrados $($script:Errors) problema(s)" -ForegroundColor Red
+    Write-Host "✗ Found $($script:Errors) problem(s)" -ForegroundColor Red
     Write-Host ""
-    Write-Host "Por favor resuelve los problemas indicados arriba antes de continuar." -ForegroundColor Yellow
+    Write-Host "Please resolve the issues indicated above before continuing." -ForegroundColor Yellow
 }
 Write-Host ""
