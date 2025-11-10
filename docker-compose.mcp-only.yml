@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: workshop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-workshop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-workshop}
+      POSTGRES_DB: ${POSTGRES_DB:-store}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-workshop} -d ${POSTGRES_DB:-store}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - workshop-network
+
+  backend:
+    build: ./backend
+    container_name: workshop-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PORT: ${BACKEND_PORT:-3001}
+      DATABASE_URL: ${DATABASE_URL:-postgres://workshop:workshop@postgres:5432/store}
+    networks:
+      - workshop-network
+
+  mcp:
+    build: ./mcp
+    container_name: workshop-mcp
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    environment:
+      PORT: ${MCP_PORT:-4000}
+      BACKEND_URL: ${BACKEND_URL:-http://backend:3001}
+      DOCS_PATH: ${DOCS_PATH:-/app/docs}
+    ports:
+      - "${MCP_PORT:-4000}:4000"
+    networks:
+      - workshop-network
+
+volumes:
+  pgdata:
+
+networks:
+  workshop-network:
+    driver: bridge
