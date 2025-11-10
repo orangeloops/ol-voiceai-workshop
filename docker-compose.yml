@@ -5,7 +5,10 @@ services:
     image: postgres:16-alpine
     container_name: workshop-postgres
     restart: unless-stopped
-    env_file: ./db/.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-workshop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-workshop}
+      POSTGRES_DB: ${POSTGRES_DB:-store}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -24,9 +27,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    env_file: ./backend/.env
+    environment:
+      PORT: ${BACKEND_PORT:-3001}
+      DATABASE_URL: ${DATABASE_URL:-postgres://workshop:workshop@postgres:5432/store}
     ports:
-      - "${PORT:-3001}:3001"
+      - "${BACKEND_PORT:-3001}:3001"
 
   mcp:
     build: ./mcp
@@ -35,15 +40,18 @@ services:
     depends_on:
       backend:
         condition: service_started
-    env_file: ./mcp/.env
+    environment:
+      PORT: ${MCP_PORT:-4000}
+      BACKEND_URL: ${BACKEND_URL:-http://backend:3001}
+      DOCS_PATH: ${DOCS_PATH:-/app/docs}
     ports:
-      - "4000:4000"
+      - "${MCP_PORT:-4000}:4000"
 
   retail-catalog:
     build:
       context: ./retail-catalog
       args:
-        NEXT_PUBLIC_API_BASE_URL: /api
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-/api}
         NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC: ${NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC}
         NEXT_PUBLIC_ELEVENLABS_AGENT_ID: ${NEXT_PUBLIC_ELEVENLABS_AGENT_ID}
     container_name: workshop-retail-catalog

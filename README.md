@@ -45,17 +45,37 @@ cp .env.example .env
 copy .env.example .env
 ```
 
-Then open `.env` and make sure the following variables exist:
+Then open `.env` and configure the following variables:
 
 ```bash
+# Ngrok Configuration
+NGROK_AUTHTOKEN=your_ngrok_token_here
+
+# PostgreSQL Database
 POSTGRES_USER=workshop
 POSTGRES_PASSWORD=workshop
 POSTGRES_DB=store
+POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-PORT=4000
 
-NGROK_AUTHTOKEN=your_ngrok_token_here
+# Backend API
+BACKEND_PORT=3001
+DATABASE_URL=postgres://workshop:workshop@postgres:5432/store
+
+# MCP Server
+MCP_PORT=4000
+BACKEND_URL=http://backend:3001
+DOCS_PATH=/app/docs
+
+# Frontend (retail-catalog) - Optional
+NEXT_PUBLIC_API_BASE_URL=/api
+NEXT_PUBLIC_ELEVENLABS_WIDGET_SRC=
+NEXT_PUBLIC_ELEVENLABS_AGENT_ID=
 ```
+
+**Important:** 
+- Make sure to add your Ngrok authtoken from [your Ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken).
+- All configuration is centralized in the root `.env` file - no need to create separate `.env` files in subdirectories.
 
 ---
 
