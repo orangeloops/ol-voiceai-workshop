@@ -30,6 +30,11 @@ services:
     environment:
       PORT: ${BACKEND_PORT:-3001}
       DATABASE_URL: ${DATABASE_URL:-postgres://workshop:workshop@postgres:5432/store}
+      POSTGRES_USER: ${POSTGRES_USER:-workshop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-workshop}
+      POSTGRES_DB: ${POSTGRES_DB:-store}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
     networks:
       - workshop-network
 
