@@ -171,14 +171,20 @@ You should see JSON responses from all endpoints.
 
 ---
 
-### **7️⃣ Add the MCP Tools (Webhooks)**
+### **7️⃣ Connect the MCP Server**
 
-| Name | URL | Method |
-|------|------|--------|
-| **get_categories** | `https://YOUR_NGROK_URL/categories` | GET |
-| **get_attributes** | `https://YOUR_NGROK_URL/attributes` | GET |
-| **catalog_product_search** | `https://YOUR_NGROK_URL/query-products` | GET |
-| **inventory_stock_lookup** | `https://YOUR_NGROK_URL/query-stock` | GET |
+1. In ElevenLabs, open your agent → **Integrations**
+2. Click **"Add Integration"** → **"Custom MCP Server"**
+3. Configure the MCP server:
+
+| Field | Value |
+|--------|--------|
+| **Server URL** | `https://YOUR_NGROK_URL/mcp` |
+| **Name** | `Retail Catalog MCP` |
+| **Description** | Connects to product catalog and inventory system |
+| **Transport** | Streamable HTTP (not SSE) |
+
+The MCP server will automatically expose all available tools (get_categories, get_attributes, catalog_product_search, inventory_stock_lookup) to your agent.
 
 ---
 
