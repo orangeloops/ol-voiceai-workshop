@@ -14,10 +14,11 @@ export async function speechToText(audioBuffer: Buffer): Promise<string> {
   }
 
   const formData = new FormData();
-  formData.append("audio", audioBuffer, {
+  formData.append("file", audioBuffer, {
     filename: "audio.webm",
     contentType: "audio/webm",
   });
+  formData.append("model_id", "scribe_v2");
 
   const response = await fetch(`${ELEVENLABS_API_URL}/speech-to-text`, {
     method: "POST",
