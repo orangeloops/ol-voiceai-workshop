@@ -119,8 +119,22 @@ This will automatically start:
 Wait until you see:
 ```
 ✅ MCP listening on http://0.0.0.0:4000
-🌐 Ngrok public URL: https://xxxxxx.ngrok-free.app
 ```
+
+**To get your Ngrok public URL:**
+
+Open http://localhost:4040 in your browser to see the Ngrok dashboard with your public URL, or run:
+
+#### macOS/Linux:
+```bash
+curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"[^"]*"' | head -1 | cut -d'"' -f4
+```
+
+#### Windows (PowerShell):
+```powershell
+(Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels").tunnels[0].public_url
+```
+
 That URL is your **public endpoint** for ElevenLabs — copy it.
 
 ---
