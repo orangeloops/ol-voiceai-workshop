@@ -311,8 +311,9 @@ app.post("/mcp", async (req: Request, res: Response) => {
         console.log(`📤 Sending response via SSE for session: ${newSessionId}`);
         sendSSEMessage(client, response);
         
-        // Respond with 202 Accepted (no body as per spec)
-        res.status(202).end();
+        // Don't close the connection - just acknowledge receipt
+        // The actual response is sent via SSE
+        res.status(202).json({ status: "accepted" });
       } else {
         // No SSE session - fall back to direct JSON response
         // This is allowed for clients that don't use SSE
@@ -341,7 +342,7 @@ app.post("/mcp", async (req: Request, res: Response) => {
       
       if (client) {
         sendSSEMessage(client, errorResponse);
-        res.status(202).end();
+        res.status(500).json({ error: "sent_via_sse" });
       } else {
         res.status(500).json(errorResponse);
       }
