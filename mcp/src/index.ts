@@ -42,6 +42,7 @@ const pendingRequests = new Map<string, { resolve: Function; reject: Function }>
 function sendSSEMessage(client: SSEClient, data: any) {
   const eventId = ++client.eventId;
   const message = `id: ${eventId}\ndata: ${JSON.stringify(data)}\n\n`;
+  console.log(`🔵 SSE Message #${eventId} to session ${client.sessionId}:`, JSON.stringify(data, null, 2));
   client.response.write(message);
   return eventId;
 }
@@ -314,25 +315,31 @@ app.post("/mcp", async (req: Request, res: Response) => {
         id: request.id
       };
 
+      console.log(`📦 Response prepared:`, JSON.stringify(response, null, 2));
+
       // Check if we have an SSE session to send the response through
       const client = newSessionId ? sessions.get(newSessionId) : null;
       
       if (client) {
         // Send response via SSE stream
         console.log(`📤 Sending response via SSE for session: ${newSessionId}`);
+        console.log(`📊 Active sessions: ${sessions.size}, Session exists: ${!!client}`);
         sendSSEMessage(client, response);
         
         // Don't close the connection - just acknowledge receipt
         // The actual response is sent via SSE
+        console.log(`✅ Sent 202 Accepted acknowledgment`);
         res.status(202).json({ status: "accepted" });
       } else {
         // No SSE session - fall back to direct JSON response
         // This is allowed for clients that don't use SSE
         console.log(`📤 Sending direct JSON response (no SSE session)${newSessionId ? ` with session ID: ${newSessionId}` : ''}`);
+        console.log(`📊 Active sessions: ${sessions.size}`);
         
         // Always set session ID header if we have one (especially for initialize)
         if (newSessionId) {
           res.setHeader("Mcp-Session-Id", newSessionId);
+          console.log(`🔖 Set Mcp-Session-Id header: ${newSessionId}`);
         }
         
         res.json(response);
@@ -350,12 +357,16 @@ app.post("/mcp", async (req: Request, res: Response) => {
         id: request.id || null
       };
 
+      console.log(`❌ Error response:`, JSON.stringify(errorResponse, null, 2));
+
       const client = sessionId ? sessions.get(sessionId) : null;
       
       if (client) {
+        console.log(`📤 Sending error via SSE for session: ${sessionId}`);
         sendSSEMessage(client, errorResponse);
         res.status(500).json({ error: "sent_via_sse" });
       } else {
+        console.log(`📤 Sending error as direct JSON response`);
         res.status(500).json(errorResponse);
       }
     }
