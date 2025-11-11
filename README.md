@@ -157,7 +157,7 @@ You should see JSON responses from all endpoints.
 
 ### **6️⃣ Create your ElevenLabs Agent**
 
-1. Go to [ElevenLabs Voice Agents](https://elevenlabs.io/voice-lab/agents)  
+1. Go to [ElevenLabs Voice Agents](https://elevenlabs.io)  
 2. Click **“Create Agent”**
 
 | Field | Value |
