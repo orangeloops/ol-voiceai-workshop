@@ -119,79 +119,45 @@ This will automatically start:
 Wait until you see:
 ```
 ✅ MCP listening on http://0.0.0.0:4000
-🌐 Ngrok public URL: https://xxxxxx.ngrok-free.app
 ```
+
+**To get your Ngrok public URL:**
+
+Open http://localhost:4040 in your browser to see the Ngrok dashboard with your public URL, or run:
+
+#### macOS/Linux:
+```bash
+curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"[^"]*"' | head -1 | cut -d'"' -f4
+```
+
+#### Windows (PowerShell):
+```powershell
+(Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels").tunnels[0].public_url
+```
+
 That URL is your **public endpoint** for ElevenLabs — copy it.
 
 ---
 
 ### **5️⃣ Verify that everything is running**
 
+Click the following URLs to verify your services are working:
+
 **Backend API:**
-
-#### macOS/Linux:
-```bash
-# Get all products
-curl "http://localhost:3001/api/products"
-
-# Get blue hoodies
-curl "http://localhost:3001/api/products?color=blue&category=hoodies"
-```
-
-#### Windows (PowerShell):
-```powershell
-# Get all products
-Invoke-WebRequest -Uri "http://localhost:3001/api/products" | Select-Object -Expand Content
-
-# Get blue hoodies
-Invoke-WebRequest -Uri "http://localhost:3001/api/products?color=blue&category=hoodies" | Select-Object -Expand Content
-```
-
-#### Windows (CMD with curl):
-```cmd
-REM Get all products
-curl "http://localhost:3001/api/products"
-
-REM Get blue hoodies
-curl "http://localhost:3001/api/products?color=blue&category=hoodies"
-```
+- [Get all products](http://localhost:3001/api/products)
+- [Get blue hoodies](http://localhost:3001/api/products?color=blue&category=hoodies)
 
 **MCP Server:**
+- [Get all categories](http://localhost:4000/categories)
+- [Query products with filters](http://localhost:4000/query-products?color=blue&category=hoodies)
 
-#### macOS/Linux:
-```bash
-# Get all categories
-curl "http://localhost:4000/categories"
-
-# Query products with filters
-curl "http://localhost:4000/query-products?color=blue&category=hoodies"
-```
-
-#### Windows (PowerShell):
-```powershell
-# Get all categories
-Invoke-WebRequest -Uri "http://localhost:4000/categories" | Select-Object -Expand Content
-
-# Query products with filters
-Invoke-WebRequest -Uri "http://localhost:4000/query-products?color=blue&category=hoodies" | Select-Object -Expand Content
-```
-
-#### Windows (CMD with curl):
-```cmd
-REM Get all categories
-curl "http://localhost:4000/categories"
-
-REM Query products with filters
-curl "http://localhost:4000/query-products?color=blue&category=hoodies"
-```
-
-You should receive JSON responses from all endpoints.
+You should see JSON responses from all endpoints.
 
 ---
 
 ### **6️⃣ Create your ElevenLabs Agent**
 
-1. Go to [ElevenLabs Voice Agents](https://elevenlabs.io/voice-lab/agents)  
+1. Go to [ElevenLabs Voice Agents](https://elevenlabs.io)  
 2. Click **“Create Agent”**
 
 | Field | Value |
@@ -205,14 +171,20 @@ You should receive JSON responses from all endpoints.
 
 ---
 
-### **7️⃣ Add the MCP Tools (Webhooks)**
+### **7️⃣ Connect the MCP Server**
 
-| Name | URL | Method |
-|------|------|--------|
-| **get_categories** | `https://YOUR_NGROK_URL/categories` | GET |
-| **get_attributes** | `https://YOUR_NGROK_URL/attributes` | GET |
-| **catalog_product_search** | `https://YOUR_NGROK_URL/query-products` | GET |
-| **inventory_stock_lookup** | `https://YOUR_NGROK_URL/query-stock` | GET |
+1. In ElevenLabs, open your agent → **Integrations**
+2. Click **"Add Integration"** → **"Custom MCP Server"**
+3. Configure the MCP server:
+
+| Field | Value |
+|--------|--------|
+| **Server URL** | `https://YOUR_NGROK_URL/mcp` |
+| **Name** | `Retail Catalog MCP` |
+| **Description** | Connects to product catalog and inventory system |
+| **Transport** | Streamable HTTP (not SSE) |
+
+The MCP server will automatically expose all available tools (get_categories, get_attributes, catalog_product_search, inventory_stock_lookup) to your agent.
 
 ---
 
