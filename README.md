@@ -141,65 +141,17 @@ That URL is your **public endpoint** for ElevenLabs — copy it.
 
 ### **5️⃣ Verify that everything is running**
 
+Click the following URLs to verify your services are working:
+
 **Backend API:**
-
-#### macOS/Linux:
-```bash
-# Get all products
-curl "http://localhost:3001/api/products"
-
-# Get blue hoodies
-curl "http://localhost:3001/api/products?color=blue&category=hoodies"
-```
-
-#### Windows (PowerShell):
-```powershell
-# Get all products
-Invoke-WebRequest -Uri "http://localhost:3001/api/products" | Select-Object -Expand Content
-
-# Get blue hoodies
-Invoke-WebRequest -Uri "http://localhost:3001/api/products?color=blue&category=hoodies" | Select-Object -Expand Content
-```
-
-#### Windows (CMD with curl):
-```cmd
-REM Get all products
-curl "http://localhost:3001/api/products"
-
-REM Get blue hoodies
-curl "http://localhost:3001/api/products?color=blue&category=hoodies"
-```
+- [Get all products](http://localhost:3001/api/products)
+- [Get blue hoodies](http://localhost:3001/api/products?color=blue&category=hoodies)
 
 **MCP Server:**
+- [Get all categories](http://localhost:4000/categories)
+- [Query products with filters](http://localhost:4000/query-products?color=blue&category=hoodies)
 
-#### macOS/Linux:
-```bash
-# Get all categories
-curl "http://localhost:4000/categories"
-
-# Query products with filters
-curl "http://localhost:4000/query-products?color=blue&category=hoodies"
-```
-
-#### Windows (PowerShell):
-```powershell
-# Get all categories
-Invoke-WebRequest -Uri "http://localhost:4000/categories" | Select-Object -Expand Content
-
-# Query products with filters
-Invoke-WebRequest -Uri "http://localhost:4000/query-products?color=blue&category=hoodies" | Select-Object -Expand Content
-```
-
-#### Windows (CMD with curl):
-```cmd
-REM Get all categories
-curl "http://localhost:4000/categories"
-
-REM Query products with filters
-curl "http://localhost:4000/query-products?color=blue&category=hoodies"
-```
-
-You should receive JSON responses from all endpoints.
+You should see JSON responses from all endpoints.
 
 ---
 
