@@ -112,6 +112,22 @@ app.get("/health", (_req: Request, res: Response) => {
   });
 });
 
+// MCP capabilities endpoint for validation
+app.get("/mcp/capabilities", (_req: Request, res: Response) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.json({
+    protocolVersion: "2024-11-05",
+    capabilities: {
+      tools: {},
+      resources: {}
+    },
+    serverInfo: {
+      name: "workshop-retail-catalog",
+      version: "1.0.0"
+    }
+  });
+});
+
 // ============================================================================
 // MCP DISCOVERY ENDPOINT (GET /mcp without SSE)
 // ============================================================================
@@ -206,12 +222,15 @@ app.get("/mcp", (req: Request, res: Response) => {
   const acceptHeader = req.headers.accept || "";
   
   console.log(`📥 GET /mcp - Accept header: ${acceptHeader}`);
+  console.log(`📥 GET /mcp - All headers:`, JSON.stringify(req.headers, null, 2));
   
-  if (acceptHeader.includes("text/event-stream")) {
+  // Only use SSE if ONLY text/event-stream is requested (not mixed with application/json)
+  if (acceptHeader === "text/event-stream" || 
+      (acceptHeader.includes("text/event-stream") && !acceptHeader.includes("application/json"))) {
     console.log(`🔄 Routing to SSE stream handler`);
     handleSSEStream(req, res);
   } else {
-    console.log(`🔄 Routing to discovery handler`);
+    console.log(`🔄 Routing to discovery handler (JSON response)`);
     handleDiscovery(req, res);
   }
 });
