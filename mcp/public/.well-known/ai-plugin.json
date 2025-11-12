@@ -9,7 +9,7 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://80c2565ec799.ngrok-free.app/openapi.json"
+    "url": "https://fsvdcoej2h.execute-api.us-east-1.amazonaws.com/dev/mcp/openapi.json"
   },
   "logo_url": "https://dummyimage.com/100x100/ff6600/ffffff.png&text=RC",
   "contact_email": "support@retailco.com",

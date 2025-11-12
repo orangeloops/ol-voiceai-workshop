@@ -64,15 +64,5 @@ services:
     ports:
       - "3000:3000"
 
-  ngrok:
-    image: ngrok/ngrok:latest
-    command: ["http", "mcp:4000"]
-    environment:
-      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-    ports:
-      - "4040:4040"
-    depends_on:
-      - mcp
-
 volumes:
   pgdata:

@@ -7,10 +7,10 @@ DC=docker compose
 up:
 	@echo "🚀 Starting Docker services..."
 	$(DC) up -d --build
-	@echo "⏳ Waiting for ngrok to initialize..."
-	sleep 8
-	@echo "🌐 Retrieving ngrok public URL..."
-	@curl -s http://localhost:4040/api/tunnels | jq -r '.tunnels[0].public_url'
+	@echo "✅ Services started successfully!"
+	@echo "🔌 MCP Server: http://localhost:4000"
+	@echo "⚙️  Backend API: http://localhost:3001"
+	@echo "🌐 AWS MCP URL: https://fsvdcoej2h.execute-api.us-east-1.amazonaws.com/dev/mcp"
 	
 down:
 	$(DC) down

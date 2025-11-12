@@ -99,26 +99,6 @@ Write-Host "══════════════════════�
 
 if (Test-Path ".env") {
     Write-Host "✓ .env file exists" -ForegroundColor Green
-    
-    # Check important variables
-    $envContent = Get-Content ".env" -Raw
-    
-    if ($envContent -match "NGROK_AUTHTOKEN=(.*)") {
-        $ngrokToken = $matches[1].Trim()
-        
-        if ([string]::IsNullOrEmpty($ngrokToken) -or $ngrokToken -eq "your_ngrok_token_here") {
-            Write-Host "⚠ NGROK_AUTHTOKEN is not configured" -ForegroundColor Yellow
-            Write-Host "  → Get your token at: https://dashboard.ngrok.com/get-started/your-authtoken" -ForegroundColor Yellow
-            $script:Errors++
-        }
-        else {
-            Write-Host "✓ NGROK_AUTHTOKEN configured" -ForegroundColor Green
-        }
-    }
-    else {
-        Write-Host "⚠ NGROK_AUTHTOKEN not found in .env" -ForegroundColor Yellow
-        $script:Errors++
-    }
 }
 else {
     Write-Host "✗ .env file does NOT exist" -ForegroundColor Red

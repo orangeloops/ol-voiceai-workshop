@@ -74,21 +74,6 @@ echo "  4. .env file"
 echo "═══════════════════════════════════════════════"
 if [ -f ".env" ]; then
     echo -e "${GREEN}✓${NC} .env file exists"
-    
-    # Check important variables
-    if grep -q "NGROK_AUTHTOKEN=" .env; then
-        NGROK_TOKEN=$(grep "NGROK_AUTHTOKEN=" .env | cut -d '=' -f2)
-        if [ -z "$NGROK_TOKEN" ] || [ "$NGROK_TOKEN" = "your_ngrok_token_here" ]; then
-            echo -e "${YELLOW}⚠${NC} NGROK_AUTHTOKEN is not configured"
-            echo -e "  ${YELLOW}→${NC} Get your token at: https://dashboard.ngrok.com/get-started/your-authtoken"
-            ERRORS=$((ERRORS + 1))
-        else
-            echo -e "${GREEN}✓${NC} NGROK_AUTHTOKEN configured"
-        fi
-    else
-        echo -e "${YELLOW}⚠${NC} NGROK_AUTHTOKEN not found in .env"
-        ERRORS=$((ERRORS + 1))
-    fi
 else
     echo -e "${RED}✗${NC} .env file does NOT exist"
     echo -e "  ${YELLOW}→${NC} Run: cp .env.example .env"

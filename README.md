@@ -1,7 +1,7 @@
 # 🗣️ Voice AI Workshop – ElevenLabs + MCP + Docker
 
 Welcome to the **Voice Agent Workshop**!  
-In this session, you'll connect a **voice-powered AI agent** (built with ElevenLabs) to a **local backend** that provides product and stock data — all running in Docker and exposed via Ngrok.
+In this session, you'll connect a **voice-powered AI agent** (built with ElevenLabs) to a **backend** deployed on AWS that provides product and stock data — all accessible via an AWS API Gateway endpoint.
 
 ---
 
@@ -11,11 +11,9 @@ Before the session, make sure you have the following installed and configured:
 
 | Tool | Purpose | Notes |
 |------|----------|-------|
-| **Docker Desktop** | Runs all workshop services (DB, backend, MCP, Ngrok) | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) - Must be running before starting |
+| **Docker Desktop** | Runs all workshop services (DB, backend, MCP) | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) - Must be running before starting |
 | **Git** | To clone the project repository | [Download Git](https://git-scm.com/downloads) |
 | **Visual Studio Code** | Recommended IDE | [Download VS Code](https://code.visualstudio.com/) |
-| **Ngrok Account** | Required to expose your local MCP to ElevenLabs | [Sign up here](https://ngrok.com/) |
-| **Ngrok Authtoken** | Needed to authenticate your tunnel | Retrieve from your Ngrok dashboard |
 | **ElevenLabs Account** | To build and test your AI voice agent | [Sign up here](https://elevenlabs.io) |
 
 ---
@@ -48,9 +46,6 @@ copy .env.example .env
 Then open `.env` and configure the following variables:
 
 ```bash
-# Ngrok Configuration
-NGROK_AUTHTOKEN=your_ngrok_token_here
-
 # PostgreSQL Database
 POSTGRES_USER=workshop
 POSTGRES_PASSWORD=workshop
@@ -74,7 +69,6 @@ NEXT_PUBLIC_ELEVENLABS_AGENT_ID=
 ```
 
 **Important:** 
-- Make sure to add your Ngrok authtoken from [your Ngrok dashboard](https://dashboard.ngrok.com/get-started/your-authtoken).
 - All configuration is centralized in the root `.env` file - no need to create separate `.env` files in subdirectories.
 
 ---
@@ -98,7 +92,6 @@ The script will check:
 - ✓ Git installation
 - ✓ VS Code installation (optional)
 - ✓ `.env` file configuration
-- ✓ Ngrok authtoken setup
 
 Fix any issues before proceeding to the next step.
 
@@ -114,28 +107,11 @@ This will automatically start:
 - 🗄️ PostgreSQL (with demo data)
 - ⚙️ Backend API (`/api/products`, `/api/stock`)
 - 🔌 MCP Server (`/categories`, `/attributes`, `/query-products`, `/query-stock`)
-- 🌍 Ngrok tunnel (to expose the MCP)
 
 Wait until you see:
 ```
 ✅ MCP listening on http://0.0.0.0:4000
 ```
-
-**To get your Ngrok public URL:**
-
-Open http://localhost:4040 in your browser to see the Ngrok dashboard with your public URL, or run:
-
-#### macOS/Linux:
-```bash
-curl -s http://localhost:4040/api/tunnels | grep -o '"public_url":"[^"]*"' | head -1 | cut -d'"' -f4
-```
-
-#### Windows (PowerShell):
-```powershell
-(Invoke-RestMethod -Uri "http://localhost:4040/api/tunnels").tunnels[0].public_url
-```
-
-That URL is your **public endpoint** for ElevenLabs — copy it.
 
 ---
 
@@ -179,7 +155,7 @@ You should see JSON responses from all endpoints.
 
 | Field | Value |
 |--------|--------|
-| **Server URL** | `https://YOUR_NGROK_URL/mcp` |
+| **Server URL** | `https://fsvdcoej2h.execute-api.us-east-1.amazonaws.com/dev/mcp` |
 | **Name** | `Retail Catalog MCP` |
 | **Description** | Connects to product catalog and inventory system |
 | **Transport** | Streamable HTTP (not SSE) |

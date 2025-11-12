@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "https://80c2565ec799.ngrok-free.app",
-      "description": "Production MCP Server"
+      "url": "https://fsvdcoej2h.execute-api.us-east-1.amazonaws.com/dev/mcp",
+      "description": "Production MCP Server (AWS API Gateway)"
     }
   ],
   "paths": {
