@@ -180,10 +180,13 @@ ElevenLabs will automatically perform **Retrieval-Augmented Generation (RAG)** w
 
 ### **9️⃣ Test Your Agent**
 
-Try questions like:
-> “Do you have blue hoodies in size M?”  
-> “What’s your return policy?”  
-> “Show me jeans under 50 dollars.”
+Try these questions:
+- "Do you have shirts for men?"
+- "What Wildcraft backpacks do you have available?"
+- "I'm looking for white Nike sports shoes"
+- "Do you have Fossil watches?"
+- "What brown wallets do you have for men?"
+- "How long do I have to return a product?"
 
 ---
 
