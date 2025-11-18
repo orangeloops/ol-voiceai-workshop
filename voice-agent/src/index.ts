@@ -103,12 +103,13 @@ app.post(
 /**
  * POST /text
  * Text-only endpoint for testing (bypasses speech-to-text)
+ * Supports session management with patience system
  */
 app.post("/text", async (req: Request, res: Response) => {
   console.log("📨 [API] Received text request");
 
   try {
-    const { text } = req.body;
+    const { text, sessionId } = req.body;
 
     if (!text) {
       return res.status(400).json({
@@ -116,51 +117,61 @@ app.post("/text", async (req: Request, res: Response) => {
       });
     }
 
-    const { createVoiceAgentGraph } = await import("./graph.js");
+    const { MemorySaver, StateGraph, START, END } = await import("@langchain/langgraph");
     const { healthCheckNode } = await import("./nodes/healthCheck.js");
     const { intentDetectionNode } = await import("./nodes/intentDetection.js");
+    const { patienceCheckNode, routeAfterPatienceCheck } = await import("./nodes/patienceCheck.js");
     const { mcpCallNode } = await import("./nodes/mcpCall.js");
-    const { textToSpeechNode } = await import("./nodes/textToSpeech.js");
 
-    // Create initial state simulating speech-to-text output
-    const initialState = {
-      transcribedText: text,
-      audioBuffer: undefined,
+    // Conditional edge for health check
+    const shouldContinueAfterHealth = (state: any) => {
+      if (state.error) return END;
+      return "intentDetection";
     };
 
-    // Build custom graph without speech-to-text
-    const { StateGraph, START, END } = await import("@langchain/langgraph");
-    
-    const textOnlyGraph = new StateGraph(VoiceAgentAnnotation)
+    // Build graph with patience system
+    const workflow = new StateGraph(VoiceAgentAnnotation)
       .addNode("healthCheck", healthCheckNode)
       .addNode("intentDetection", intentDetectionNode)
+      .addNode("patienceCheck", patienceCheckNode)
       .addNode("mcpCall", mcpCallNode)
-      .addNode("textToSpeech", textToSpeechNode)
       .addEdge(START, "healthCheck")
-      .addConditionalEdges("healthCheck", (state: any) => {
-        if (state.error) return END;
-        return "intentDetection";
-      }, {
+      .addConditionalEdges("healthCheck", shouldContinueAfterHealth, {
         intentDetection: "intentDetection",
         __end__: END,
       })
-      .addEdge("intentDetection", "mcpCall")
-      .addEdge("mcpCall", "textToSpeech")
-      .addEdge("textToSpeech", END)
-      .compile();
+      .addEdge("intentDetection", "patienceCheck")
+      .addConditionalEdges("patienceCheck", routeAfterPatienceCheck, {
+        mcpCall: "mcpCall",
+        textToSpeech: END,
+      })
+      .addEdge("mcpCall", END);
 
-    const result = await textOnlyGraph.invoke(initialState);
+    // Use MemorySaver for persistent sessions
+    const checkpointer = new MemorySaver();
+    const textGraph = workflow.compile({ checkpointer });
+
+    // Use sessionId or create a default one
+    const config = {
+      configurable: {
+        thread_id: sessionId || "default-session",
+      },
+    };
+
+    const result = await textGraph.invoke({ transcribedText: text }, config);
 
     // Return response
     const response: any = {
       transcribedText: result.transcribedText,
       intent: result.intent,
       responseText: result.responseText,
+      offTopicCount: result.offTopicCount || 0,
+      sessionId: config.configurable.thread_id,
     };
 
-    if (result.audioResponse) {
-      response.audioResponse = result.audioResponse.toString("base64");
-      response.audioMimeType = "audio/mpeg";
+    // Check if patience limit was reached
+    if (result.error === "PATIENCE_LIMIT_REACHED") {
+      response.patienceLimitReached = true;
     }
 
     console.log("✅ [API] Text request processed successfully");

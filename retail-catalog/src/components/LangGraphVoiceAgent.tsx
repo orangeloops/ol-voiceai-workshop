@@ -3,8 +3,11 @@
 import { useState, useRef } from "react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Mic, MicOff, Volume2, Loader2 } from "lucide-react";
+import { Input } from "../../components/ui/input";
+import { Mic, MicOff, Volume2, Loader2, Send, MessageSquare } from "lucide-react";
 import { Alert, AlertDescription } from "../../components/ui/alert";
+import { Badge } from "../../components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
 
 const VOICE_AGENT_URL = process.env.NEXT_PUBLIC_VOICE_AGENT_URL || "http://localhost:5000";
 
@@ -14,6 +17,10 @@ export function LangGraphVoiceAgent() {
   const [transcription, setTranscription] = useState("");
   const [response, setResponse] = useState("");
   const [error, setError] = useState("");
+  const [textInput, setTextInput] = useState("");
+  const [offTopicCount, setOffTopicCount] = useState(0);
+  const [sessionId] = useState(() => `session-${Date.now()}`);
+  const [patienceLimitReached, setPatienceLimitReached] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -83,6 +90,8 @@ export function LangGraphVoiceAgent() {
       
       setTranscription(data.transcribedText || "");
       setResponse(data.responseText || "");
+      setOffTopicCount(data.offTopicCount || 0);
+      setPatienceLimitReached(data.patienceLimitReached || false);
 
       // Play audio response if available
       if (data.audioResponse) {
@@ -94,6 +103,49 @@ export function LangGraphVoiceAgent() {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const sendTextToAgent = async (text: string) => {
+    if (!text.trim()) return;
+    
+    setIsProcessing(true);
+    setError("");
+    
+    try {
+      const response = await fetch(`${VOICE_AGENT_URL}/text`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: text.trim(),
+          sessionId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to process text");
+      }
+
+      const data = await response.json();
+      
+      setTranscription(data.transcribedText || text);
+      setResponse(data.responseText || "");
+      setOffTopicCount(data.offTopicCount || 0);
+      setPatienceLimitReached(data.patienceLimitReached || false);
+      setTextInput("");
+    } catch (err) {
+      console.error("Error sending text:", err);
+      setError(err instanceof Error ? err.message : "Failed to process text");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleTextSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendTextToAgent(textInput);
   };
 
   const playAudioResponse = (base64Audio: string) => {
@@ -119,55 +171,117 @@ export function LangGraphVoiceAgent() {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Volume2 className="h-6 w-6" />
-          LangGraph Voice Agent
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Volume2 className="h-6 w-6" />
+            <CardTitle>LangGraph Voice Agent</CardTitle>
+          </div>
+          {offTopicCount > 0 && (
+            <Badge variant={offTopicCount >= 7 ? "destructive" : offTopicCount >= 5 ? "default" : "secondary"}>
+              Off-topic: {offTopicCount}/10
+            </Badge>
+          )}
+        </div>
         <CardDescription>
-          Ask about products, check stock, or inquire about store policies using your voice
+          Ask about products, check stock, or inquire about store policies using voice or text
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Recording Controls */}
-        <div className="flex justify-center">
-          {!isRecording && !isProcessing && (
-            <Button
-              size="lg"
-              onClick={startRecording}
-              className="rounded-full h-20 w-20"
-            >
-              <Mic className="h-8 w-8" />
-            </Button>
-          )}
-          
-          {isRecording && (
-            <Button
-              size="lg"
-              variant="destructive"
-              onClick={stopRecording}
-              className="rounded-full h-20 w-20 animate-pulse"
-            >
-              <MicOff className="h-8 w-8" />
-            </Button>
-          )}
-          
-          {isProcessing && (
-            <Button
-              size="lg"
-              disabled
-              className="rounded-full h-20 w-20"
-            >
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </Button>
-          )}
-        </div>
+        <Tabs defaultValue="voice" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="voice" disabled={patienceLimitReached}>
+              <Mic className="h-4 w-4 mr-2" />
+              Voice
+            </TabsTrigger>
+            <TabsTrigger value="text" disabled={patienceLimitReached}>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Text
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Status Text */}
-        <div className="text-center text-sm text-muted-foreground">
-          {isRecording && "🎤 Recording... Click to stop"}
-          {isProcessing && "🔄 Processing your request..."}
-          {!isRecording && !isProcessing && "Click the microphone to start"}
-        </div>
+          {/* Voice Tab */}
+          <TabsContent value="voice" className="space-y-4">
+            <div className="flex justify-center py-4">
+              {!isRecording && !isProcessing && (
+                <Button
+                  size="lg"
+                  onClick={startRecording}
+                  className="rounded-full h-20 w-20"
+                  disabled={patienceLimitReached}
+                >
+                  <Mic className="h-8 w-8" />
+                </Button>
+              )}
+              
+              {isRecording && (
+                <Button
+                  size="lg"
+                  variant="destructive"
+                  onClick={stopRecording}
+                  className="rounded-full h-20 w-20 animate-pulse"
+                >
+                  <MicOff className="h-8 w-8" />
+                </Button>
+              )}
+              
+              {isProcessing && (
+                <Button
+                  size="lg"
+                  disabled
+                  className="rounded-full h-20 w-20"
+                >
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </Button>
+              )}
+            </div>
+
+            <div className="text-center text-sm text-muted-foreground">
+              {isRecording && "🎤 Recording... Click to stop"}
+              {isProcessing && "🔄 Processing your request..."}
+              {!isRecording && !isProcessing && !patienceLimitReached && "Click the microphone to start"}
+              {patienceLimitReached && "Session ended due to too many off-topic questions"}
+            </div>
+          </TabsContent>
+
+          {/* Text Tab */}
+          <TabsContent value="text" className="space-y-4">
+            <form onSubmit={handleTextSubmit} className="flex gap-2 py-4">
+              <Input
+                placeholder="Type your question here..."
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                disabled={isProcessing || patienceLimitReached}
+                className="flex-1"
+              />
+              <Button 
+                type="submit" 
+                disabled={isProcessing || !textInput.trim() || patienceLimitReached}
+                size="icon"
+              >
+                {isProcessing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </form>
+
+            <div className="text-center text-sm text-muted-foreground">
+              {isProcessing && "🔄 Processing your request..."}
+              {!isProcessing && !patienceLimitReached && "Type a question and press Enter or click Send"}
+              {patienceLimitReached && "Session ended due to too many off-topic questions"}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Patience Limit Warning */}
+        {patienceLimitReached && (
+          <Alert variant="destructive">
+            <AlertDescription>
+              Your session has ended due to too many off-topic questions. Please refresh the page to start a new session and focus on products, stock, or store policies.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Error Alert */}
         {error && (
