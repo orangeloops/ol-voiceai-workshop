@@ -5,6 +5,7 @@ import { intentDetectionNode } from "./nodes/intentDetection.js";
 import { patienceCheckNode, routeAfterPatienceCheck } from "./nodes/patienceCheck.js";
 import { mcpCallNode } from "./nodes/mcpCall.js";
 import fetch from "node-fetch";
+import * as readline from "readline";
 
 /**
  * Simplified health check for testing - only checks what we need
@@ -185,7 +186,6 @@ async function testPatienceSystem() {
  */
 async function interactiveTest() {
   const graph = createTestGraph();
-  const readline = require("readline");
   
   const rl = readline.createInterface({
     input: process.stdin,
