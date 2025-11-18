@@ -11,7 +11,7 @@ Before the session, make sure you have the following installed and configured:
 
 | Tool | Purpose | Notes |
 |------|----------|-------|
-| **Docker Desktop** | Runs all workshop services (DB, backend, MCP) | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) - Must be running before starting |
+| **Docker Desktop (Optional)** | Runs all workshop services (DB, backend, MCP) | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) - Must be running before starting |
 | **Git** | To clone the project repository | [Download Git](https://git-scm.com/downloads) |
 | **Visual Studio Code** | Recommended IDE | [Download VS Code](https://code.visualstudio.com/) |
 | **ElevenLabs Account** | To build and test your AI voice agent | [Sign up here](https://elevenlabs.io) |
